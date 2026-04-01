@@ -253,6 +253,13 @@
   transition: opacity 0.2s ease;
 }
 
+/* Otevřený detail: čísla skupin / period — bez hoveru a bez kurzoru „nápověda“. */
+.periodic-table-root[data-pt-dim-others] .pt-col-labels .pt-axis-tile--col,
+.periodic-table-root[data-pt-dim-others] .pt-row-labels .pt-axis-tile--row {
+  pointer-events: none;
+  cursor: default;
+}
+
 .pt-table-title__line {
   display: block;
   max-width: 95%;
@@ -374,8 +381,8 @@
   inset: 0;
   z-index: 60;
   pointer-events: none;
-  /* čtverce o 30 % menší než původních 72px */
-  --pt-nav-btn: calc(72px * 0.7);
+  /* původně 72px × 0.7 (−30 %), pak ještě −20 % */
+  --pt-nav-btn: calc(72px * 0.7 * 0.8);
   /* šipka vyplní většinu čtverce */
   --pt-nav-icon: calc(var(--pt-nav-btn) * 0.8);
   --pt-nav-arrow-ink: #0a1629;
@@ -396,16 +403,18 @@
   padding: 0;
   margin: 0;
   color: var(--pt-nav-arrow-ink);
-  background: #ffffff;
-  border: 1px solid rgb(107 159 255 / 0.45);
+  background: rgb(242 246 255);
+  border: 1px solid rgb(160 190 235 / 0.65);
   border-radius: calc(var(--pt-nav-btn) * 12 / 72);
   cursor: pointer;
-  opacity: 1;
+  /* o 30 % nižší než plná neprůhlednost */
+  opacity: 0.7;
   pointer-events: auto;
   box-shadow:
-    0 2px 8px rgb(0 0 0 / 0.22),
-    inset 0 1px 0 0 rgb(255 255 255 / 0.9);
+    0 2px 8px rgb(0 0 0 / 0.18),
+    inset 0 1px 0 0 rgb(255 255 255 / 0.75);
   transition:
+    opacity 0.2s ease,
     background 0.2s ease,
     border-color 0.2s ease,
     box-shadow 0.2s ease,
@@ -413,12 +422,13 @@
 }
 
 .pt-element-nav-arrow:hover:not(:disabled) {
+  opacity: 0.95;
   color: #0d213f;
-  background: rgb(245 245 255);
-  border-color: var(--focus-ring);
+  background: rgb(232 240 255);
+  border-color: rgb(107 159 255 / 0.75);
   box-shadow:
-    0 3px 12px rgb(107 159 255 / 0.25),
-    inset 0 1px 0 0 rgb(255 255 255 / 0.95);
+    0 3px 12px rgb(107 159 255 / 0.22),
+    inset 0 1px 0 0 rgb(255 255 255 / 0.85);
 }
 
 .pt-element-nav-arrow:focus-visible {
@@ -427,7 +437,7 @@
 }
 
 .pt-element-nav-arrow:disabled {
-  opacity: 0.45;
+  opacity: 0.32;
   cursor: default;
   pointer-events: none;
   background: rgb(240 242 248);
@@ -455,7 +465,7 @@
   transform: translate(
     -50%,
     calc(
-      -50% + var(--pt-nav-half-scaled) + var(--pt-nav-gap) + var(--pt-nav-btn) / 2
+      -50% + var(--pt-nav-half-scaled) + var(--pt-nav-gap) + var(--pt-nav-btn) / 2 + 15px
     )
   );
 }
@@ -673,6 +683,8 @@
   cursor: pointer;
   z-index: 1;
 
+  -webkit-tap-highlight-color: transparent;
+
   transition: filter 0.18s ease;
 }
 
@@ -767,6 +779,11 @@
 .pt-cell:focus-visible {
   outline: 2px solid #7eb8ff;
   outline-offset: 3px;
+}
+
+/* Vybraná dlaždice už má vlastní rámeček + scale — programový focus by jinak přidal modrý „dvojitý“ obrys. */
+.pt-cell.pt-selected:focus-visible {
+  outline: none;
 }
 
 .pt-selected {

@@ -457,7 +457,14 @@ export default function App() {
 
   return (
     <div className="app-shell">
-      <div className="app-body">
+      <div
+        className={[
+          'app-body',
+          selected && !inspectorFullscreen ? 'app-body--detail-open' : '',
+        ]
+          .filter(Boolean)
+          .join(' ')}
+      >
         <div
           className={[
             'app-canvas-wrap',

@@ -1,5 +1,9 @@
 import { useEffect, useState } from 'react'
 import type { ChemicalElement } from '../data/elements'
+import {
+  atomModelPaletteForElement,
+  type AtomModelPalette,
+} from '../data/atomModelColors'
 import { getAtomShellData } from '../data/shellsFromPeriodicTableJson'
 import './Atom2DModel.css'
 
@@ -67,6 +71,7 @@ export function Atom2DModel({
     ? buildNucleusParticlesReadable(element.z, neutronCount)
     : buildNucleusParticles(element.z, neutronCount)
   const freezeSpin = reduceMotion || spinPaused
+  const palette = atomModelPaletteForElement(element)
 
   return (
     <div
@@ -92,23 +97,11 @@ export function Atom2DModel({
             : undefined
         }
       >
-        <defs>
-          <radialGradient id={`nuc-glow-${element.z}`} cx="40%" cy="35%" r="65%">
-            <stop offset="0%" stopColor="#ffccbc" />
-            <stop offset="55%" stopColor="#e57373" />
-            <stop offset="100%" stopColor="#c62828" />
-          </radialGradient>
-          <radialGradient id={`e-fill-${element.z}`} cx="35%" cy="30%" r="70%">
-            <stop offset="0%" stopColor="#e1f5fe" />
-            <stop offset="100%" stopColor="#29b6f6" />
-          </radialGradient>
-        </defs>
-
         <NucleusGroup
-          z={element.z}
           particles={nucleusVisual}
           freezeSpin={freezeSpin}
           nucleusScale={isStage ? STAGE_NUCLEUS_SCALE : 1}
+          palette={palette}
         />
 
         {nonEmptyShells.map(({ count, shellIndex }) => {
@@ -119,13 +112,13 @@ export function Atom2DModel({
           return (
             <ShellGroup
               key={shellIndex}
-              elementZ={element.z}
               orbitR={r}
               electronCount={count}
               electronR={er}
               durationSec={sec}
               reverse={reverse}
               freezeSpin={freezeSpin}
+              palette={palette}
             />
           )
         })}
@@ -135,15 +128,15 @@ export function Atom2DModel({
 }
 
 function NucleusGroup({
-  z,
   particles,
   freezeSpin,
   nucleusScale,
+  palette,
 }: {
-  z: number
   particles: { x: number; y: number; kind: 'p' | 'n' }[]
   freezeSpin: boolean
   nucleusScale: number
+  palette: AtomModelPalette
 }) {
   const scaleAttr =
     nucleusScale !== 1 ? `scale(${nucleusScale})` : undefined
@@ -163,8 +156,9 @@ function NucleusGroup({
       <g transform={scaleAttr}>
         <circle
           r={nucleusScale !== 1 ? 20.5 : 19}
-          fill={`url(#nuc-glow-${z})`}
-          opacity={0.92}
+          fill={palette.nucleusFill}
+          stroke={palette.nucleusStroke}
+          strokeWidth={1.35}
         />
         {particles.map((p, i) => {
           const pr = nucleusScale !== 1 ? 2.28 : 3.4
@@ -176,8 +170,8 @@ function NucleusGroup({
               cx={p.x}
               cy={p.y}
               r={p.kind === 'p' ? pr : nr}
-              fill={p.kind === 'p' ? '#ff1744' : '#b0bec5'}
-              stroke={p.kind === 'p' ? '#b71c1c' : '#546e7a'}
+              fill={p.kind === 'p' ? palette.protonFill : palette.neutronFill}
+              stroke={p.kind === 'p' ? palette.protonStroke : palette.neutronStroke}
               strokeWidth={sw}
             />
           )
@@ -188,21 +182,21 @@ function NucleusGroup({
 }
 
 function ShellGroup({
-  elementZ,
   orbitR,
   electronCount,
   electronR,
   durationSec,
   reverse,
   freezeSpin,
+  palette,
 }: {
-  elementZ: number
   orbitR: number
   electronCount: number
   electronR: number
   durationSec: number
   reverse: boolean
   freezeSpin: boolean
+  palette: AtomModelPalette
 }) {
   const dur = `${durationSec}s`
   return (
@@ -221,10 +215,10 @@ function ShellGroup({
       <circle
         r={orbitR}
         fill="none"
-        stroke="#64748b"
+        stroke={palette.orbitStroke}
         strokeWidth={0.9}
         strokeDasharray="5 6"
-        opacity={0.45}
+        opacity={0.5}
       />
       {Array.from({ length: electronCount }, (_, ei) => {
         const ang = (2 * Math.PI * ei) / electronCount - Math.PI / 2
@@ -236,8 +230,8 @@ function ShellGroup({
             cx={cx}
             cy={cy}
             r={electronR}
-            fill={`url(#e-fill-${elementZ})`}
-            stroke="#01579b"
+            fill={palette.electronFill}
+            stroke={palette.electronStroke}
             strokeWidth={0.85}
           />
         )

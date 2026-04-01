@@ -1,5 +1,5 @@
 import type { CSSProperties, ReactNode } from 'react'
-import { memo, useMemo, useState } from 'react'
+import { memo, useEffect, useLayoutEffect, useMemo, useState } from 'react'
 import {
   ELEMENTS,
   PERIODIC_TABLE_CELL_PX,
@@ -351,9 +351,34 @@ function PeriodicTableInner({
     if (selectedZ == null) return null
     return elementCellCenterInPeriodicTableGridPx(selectedZ, layoutMode)
   }, [selectedZ, layoutMode])
+
+  /* Po navigaci šipkami zůstával focus na předchozí buňce → obrys :focus-visible; přesuneme focus na aktuální výběr. */
+  useLayoutEffect(() => {
+    if (selectedZ == null) {
+      const active = document.activeElement
+      if (active instanceof HTMLElement && active.classList.contains('pt-cell')) {
+        active.blur()
+      }
+      return
+    }
+    const wrap = document.querySelector<HTMLElement>(
+      `[data-pt-element-z="${String(selectedZ)}"]`,
+    )
+    const btn = wrap?.querySelector<HTMLButtonElement>('button.pt-cell')
+    if (btn) {
+      btn.focus({ preventScroll: true })
+    }
+  }, [selectedZ])
+
   const { cols: gridCols, rows: gridRows } =
     periodicTableGridDimensions(layoutMode)
   const [axisHover, setAxisHover] = useState<AxisHover | null>(null)
+  /* Při otevřeném detailu prvku nezobrazovat pásmo osy ani nezamlžovat mřížku podle osy. */
+  const effectiveAxisHover = selectedZ != null ? null : axisHover
+
+  useEffect(() => {
+    if (selectedZ != null) setAxisHover(null)
+  }, [selectedZ])
 
   const byKey = new Map<string, ChemicalElement>()
   for (const el of ELEMENTS) {
@@ -362,22 +387,22 @@ function PeriodicTableInner({
   }
 
   let axisCaption: string | null = null
-  if (axisHover != null) {
+  if (effectiveAxisHover != null) {
     const els: ChemicalElement[] = []
-    if (axisHover.kind === 'col') {
+    if (effectiveAxisHover.kind === 'col') {
       for (let r = 1; r <= gridRows; r++) {
-        const el = byKey.get(`${r},${axisHover.index}`)
+        const el = byKey.get(`${r},${effectiveAxisHover.index}`)
         if (el) els.push(el)
       }
     } else {
       for (let c = 1; c <= gridCols; c++) {
-        const el = byKey.get(`${axisHover.index},${c}`)
+        const el = byKey.get(`${effectiveAxisHover.index},${c}`)
         if (el) els.push(el)
       }
     }
     const raw = axisBandHint(
-      axisHover.kind,
-      axisHover.index,
+      effectiveAxisHover.kind,
+      effectiveAxisHover.index,
       layoutMode,
       els,
     ).trim()
@@ -389,9 +414,9 @@ function PeriodicTableInner({
     for (let col = 1; col <= gridCols; col++) {
       const el = byKey.get(`${row},${col}`)
       const inAxisBand =
-        axisHover == null ||
-        (axisHover.kind === 'col' && col === axisHover.index) ||
-        (axisHover.kind === 'row' && row === axisHover.index)
+        effectiveAxisHover == null ||
+        (effectiveAxisHover.kind === 'col' && col === effectiveAxisHover.index) ||
+        (effectiveAxisHover.kind === 'row' && row === effectiveAxisHover.index)
       if (el) {
         const selected = el.z === selectedZ
         const legendMatch =
@@ -400,7 +425,7 @@ function PeriodicTableInner({
         const faded =
           (selectedZ != null && !selected) ||
           (legendHighlight != null && !legendMatch) ||
-          (axisHover != null && !inAxisBand)
+          (effectiveAxisHover != null && !inAxisBand)
         const core = ZS_ELEMENT_CORE[el.z]
         const chi = core?.elektronegativita ?? null
         const ar = formatArForTile(core?.ar ?? '—')
@@ -478,7 +503,7 @@ function PeriodicTableInner({
               'pt-empty',
               selectedZ != null ||
               legendHighlight != null ||
-              (axisHover != null && !inAxisBand)
+              (effectiveAxisHover != null && !inAxisBand)
                 ? 'pt-empty--faded'
                 : '',
             ]
@@ -547,7 +572,7 @@ function PeriodicTableInner({
                 className={[
                   'pt-axis-tile',
                   'pt-axis-tile--corner',
-                  axisHover != null ? 'pt-axis-tile--dim' : '',
+                  effectiveAxisHover != null ? 'pt-axis-tile--dim' : '',
                 ]
                   .filter(Boolean)
                   .join(' ')}
@@ -572,19 +597,24 @@ function PeriodicTableInner({
                   className={[
                     'pt-axis-tile',
                     'pt-axis-tile--col',
-                    axisHover?.kind === 'col' && axisHover.index === gridCol
+                    effectiveAxisHover?.kind === 'col' &&
+                    effectiveAxisHover.index === gridCol
                       ? 'pt-axis-tile--band'
                       : '',
-                    axisHover != null &&
-                    !(axisHover.kind === 'col' && axisHover.index === gridCol)
+                    effectiveAxisHover != null &&
+                    !(
+                      effectiveAxisHover.kind === 'col' &&
+                      effectiveAxisHover.index === gridCol
+                    )
                       ? 'pt-axis-tile--dim'
                       : '',
                   ]
                     .filter(Boolean)
                     .join(' ')}
-                  onPointerEnter={() =>
+                  onPointerEnter={() => {
+                    if (selectedZ != null) return
                     setAxisHover({ kind: 'col', index: gridCol })
-                  }
+                  }}
                 >
                   <div className="pt-axis-tile__face">
                     {label != null ? (
@@ -614,19 +644,24 @@ function PeriodicTableInner({
                     className={[
                       'pt-axis-tile',
                       'pt-axis-tile--row',
-                      axisHover?.kind === 'row' && axisHover.index === gridRow
+                      effectiveAxisHover?.kind === 'row' &&
+                      effectiveAxisHover.index === gridRow
                         ? 'pt-axis-tile--band'
                         : '',
-                      axisHover != null &&
-                      !(axisHover.kind === 'row' && axisHover.index === gridRow)
+                      effectiveAxisHover != null &&
+                      !(
+                        effectiveAxisHover.kind === 'row' &&
+                        effectiveAxisHover.index === gridRow
+                      )
                         ? 'pt-axis-tile--dim'
                         : '',
                     ]
                       .filter(Boolean)
                       .join(' ')}
-                    onPointerEnter={() =>
+                    onPointerEnter={() => {
+                      if (selectedZ != null) return
                       setAxisHover({ kind: 'row', index: gridRow })
-                    }
+                    }}
                   >
                     <div className="pt-axis-tile__face">
                       <span className="pt-axis-num pt-axis-num--row">{label}</span>
