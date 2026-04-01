@@ -360,6 +360,124 @@
     filter 0.2s ease;
 }
 
+.pt-grid-and-nav {
+  position: relative;
+  width: fit-content;
+}
+
+/*
+ * Navigace mezi prvky: čtvercová tlačítka u rozšířené dlaždice (střed buňky = --pt-nav-cx / --pt-nav-cy).
+ * Odskok od okraje po přiblížení (scale) z --pt-selected-scale na rootu.
+ */
+.pt-element-nav-arrows {
+  position: absolute;
+  inset: 0;
+  z-index: 60;
+  pointer-events: none;
+  /* čtverce o 30 % menší než původních 72px */
+  --pt-nav-btn: calc(72px * 0.7);
+  /* šipka vyplní většinu čtverce */
+  --pt-nav-icon: calc(var(--pt-nav-btn) * 0.8);
+  --pt-nav-arrow-ink: #0a1629;
+  --pt-nav-gap: calc(12px * 0.7);
+  --pt-nav-half-scaled: calc(var(--pt-cell) * var(--pt-selected-scale, 3) / 2);
+}
+
+.pt-element-nav-arrow {
+  position: absolute;
+  left: var(--pt-nav-cx, 0px);
+  top: var(--pt-nav-cy, 0px);
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--pt-nav-btn);
+  height: var(--pt-nav-btn);
+  padding: 0;
+  margin: 0;
+  color: var(--pt-nav-arrow-ink);
+  background: #ffffff;
+  border: 1px solid rgb(107 159 255 / 0.45);
+  border-radius: calc(var(--pt-nav-btn) * 12 / 72);
+  cursor: pointer;
+  opacity: 1;
+  pointer-events: auto;
+  box-shadow:
+    0 2px 8px rgb(0 0 0 / 0.22),
+    inset 0 1px 0 0 rgb(255 255 255 / 0.9);
+  transition:
+    background 0.2s ease,
+    border-color 0.2s ease,
+    box-shadow 0.2s ease,
+    transform 0.15s ease;
+}
+
+.pt-element-nav-arrow:hover:not(:disabled) {
+  color: #0d213f;
+  background: rgb(245 245 255);
+  border-color: var(--focus-ring);
+  box-shadow:
+    0 3px 12px rgb(107 159 255 / 0.25),
+    inset 0 1px 0 0 rgb(255 255 255 / 0.95);
+}
+
+.pt-element-nav-arrow:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+
+.pt-element-nav-arrow:disabled {
+  opacity: 0.45;
+  cursor: default;
+  pointer-events: none;
+  background: rgb(240 242 248);
+  color: rgb(110 125 150);
+  border-color: rgb(180 190 210 / 0.6);
+}
+
+.pt-element-nav-arrow-icon {
+  display: block;
+  width: var(--pt-nav-icon);
+  height: var(--pt-nav-icon);
+  flex-shrink: 0;
+}
+
+.pt-element-nav-arrow--up {
+  transform: translate(
+    -50%,
+    calc(
+      -50% - var(--pt-nav-half-scaled) - var(--pt-nav-gap) - var(--pt-nav-btn) / 2
+    )
+  );
+}
+
+.pt-element-nav-arrow--down {
+  transform: translate(
+    -50%,
+    calc(
+      -50% + var(--pt-nav-half-scaled) + var(--pt-nav-gap) + var(--pt-nav-btn) / 2
+    )
+  );
+}
+
+.pt-element-nav-arrow--left {
+  transform: translate(
+    calc(
+      -50% - var(--pt-nav-half-scaled) - var(--pt-nav-gap) - var(--pt-nav-btn) / 2
+    ),
+    -50%
+  );
+}
+
+.pt-element-nav-arrow--right {
+  transform: translate(
+    calc(
+      -50% + var(--pt-nav-half-scaled) + var(--pt-nav-gap) + var(--pt-nav-btn) / 2
+    ),
+    -50%
+  );
+}
+
 /* Spoje La→Ce, Ac→Th ve zkráceném rozvržení (pod dlaždicemi) */
 .pt-fblock-arrows {
   position: absolute;

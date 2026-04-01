@@ -132,7 +132,7 @@ export default function App() {
       const t = e.target as HTMLElement
       if (t.closest('button.pt-cell')) return
       if (t.closest('.pt-fblock-expand-nub')) return
-      if (t.closest('.app-element-nav-arrows')) return
+      if (t.closest('.pt-element-nav-arrows')) return
       if (selectedZ != null) setSelectedZ(null)
       if (legendClicked != null) setLegendClicked(null)
     },
@@ -170,18 +170,6 @@ export default function App() {
         : (ELEMENTS.find((e) => e.z === selectedZ) ?? null),
     [selectedZ],
   )
-
-  const navNeighbors = useMemo(() => {
-    if (selectedZ == null) {
-      return { up: null, down: null, left: null, right: null } as const
-    }
-    return {
-      up: neighborElementInDirection(selectedZ, layoutMode, 'up'),
-      down: neighborElementInDirection(selectedZ, layoutMode, 'down'),
-      left: neighborElementInDirection(selectedZ, layoutMode, 'left'),
-      right: neighborElementInDirection(selectedZ, layoutMode, 'right'),
-    }
-  }, [selectedZ, layoutMode])
 
   const navigateSelect = useCallback(
     (dir: GridNavDirection) => {
@@ -500,6 +488,8 @@ export default function App() {
               legendHighlight={legendHighlight}
               viewportWidth={viewportSize.w}
               viewportHeight={viewportSize.h}
+              onNavigate={navigateSelect}
+              inspectorFullscreen={inspectorFullscreen}
             />
           </InfiniteCanvas>
         </div>

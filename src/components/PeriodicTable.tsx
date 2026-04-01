@@ -4,10 +4,13 @@ import {
   ELEMENTS,
   PERIODIC_TABLE_CELL_PX,
   PERIODIC_TABLE_GAP_PX,
+  elementCellCenterInPeriodicTableGridPx,
   gridPositionForLayout,
+  neighborElementInDirection,
   periodicTableGridDimensions,
   type ChemicalElement,
   type ElementCategory,
+  type GridNavDirection,
   type PeriodicTableLayoutMode,
 } from '../data/elements'
 import {
@@ -42,6 +45,10 @@ type Props = {
   /** Rozměry plátna (`.infinite-canvas-viewport`) — pro omezení 3× zvětšení při silném zoomu. */
   viewportWidth: number
   viewportHeight: number
+  /** Přepnutí na sousední prvek (šipky u rozkliknuté buňky + klávesnice v App). */
+  onNavigate: (dir: GridNavDirection) => void
+  /** V celoobrazovkovém inspektoru šipky u buňky skrýt. */
+  inspectorFullscreen: boolean
 }
 
 /** Prah v pixelech strany buňky na obrazovce (š × zoom), dříve ekvivalent 118×zoom. */
@@ -318,6 +325,8 @@ function PeriodicTableInner({
   legendHighlight,
   viewportWidth,
   viewportHeight,
+  onNavigate,
+  inspectorFullscreen,
 }: Props) {
   const lod = detailLevelForZoom(zoom)
   const selectedTileScale = useMemo(
@@ -325,6 +334,23 @@ function PeriodicTableInner({
       selectedTileScaleForViewport(zoom, viewportWidth, viewportHeight),
     [zoom, viewportWidth, viewportHeight],
   )
+
+  const navNeighbors = useMemo(() => {
+    if (selectedZ == null) {
+      return { up: null, down: null, left: null, right: null } as const
+    }
+    return {
+      up: neighborElementInDirection(selectedZ, layoutMode, 'up'),
+      down: neighborElementInDirection(selectedZ, layoutMode, 'down'),
+      left: neighborElementInDirection(selectedZ, layoutMode, 'left'),
+      right: neighborElementInDirection(selectedZ, layoutMode, 'right'),
+    }
+  }, [selectedZ, layoutMode])
+
+  const navCenter = useMemo(() => {
+    if (selectedZ == null) return null
+    return elementCellCenterInPeriodicTableGridPx(selectedZ, layoutMode)
+  }, [selectedZ, layoutMode])
   const { cols: gridCols, rows: gridRows } =
     periodicTableGridDimensions(layoutMode)
   const [axisHover, setAxisHover] = useState<AxisHover | null>(null)
@@ -490,6 +516,14 @@ function PeriodicTableInner({
         } as CSSProperties)
       : undefined
 
+  const navLayerStyle: CSSProperties | undefined =
+    selectedZ != null && navCenter != null
+      ? ({
+          '--pt-nav-cx': `${navCenter.x}px`,
+          '--pt-nav-cy': `${navCenter.y}px`,
+        } as CSSProperties)
+      : undefined
+
   return (
     <div
       className="periodic-table-root"
@@ -611,14 +645,120 @@ function PeriodicTableInner({
               ) : (
                 <FBlockExpandedCompactNub onCompact={onCompactLayout} />
               )}
-              <div
-                className="periodic-table-grid"
-                style={{
-                  gridTemplateColumns: `repeat(${gridCols}, var(--pt-cell))`,
-                  gridTemplateRows: `repeat(${gridRows}, var(--pt-cell))`,
-                }}
-              >
-                {cells}
+              <div className="pt-grid-and-nav">
+                <div
+                  className="periodic-table-grid"
+                  style={{
+                    gridTemplateColumns: `repeat(${gridCols}, var(--pt-cell))`,
+                    gridTemplateRows: `repeat(${gridRows}, var(--pt-cell))`,
+                  }}
+                >
+                  {cells}
+                </div>
+                {selectedZ != null &&
+                !inspectorFullscreen &&
+                navCenter != null ? (
+                  <nav
+                    className="pt-element-nav-arrows"
+                    style={navLayerStyle}
+                    aria-label="Sousední prvek v tabulce"
+                  >
+                    <button
+                      type="button"
+                      className="pt-element-nav-arrow pt-element-nav-arrow--up"
+                      disabled={navNeighbors.up == null}
+                      onClick={() => onNavigate('up')}
+                      aria-label="Vybrat prvek o řádek výš"
+                      title="Řádek nahoru (↑)"
+                    >
+                      <svg
+                        className="pt-element-nav-arrow-icon"
+                        viewBox="0 0 24 24"
+                        aria-hidden
+                      >
+                        <path
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="2.5"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          d="M10 7l5 5-5 5"
+                          transform="rotate(-90 12 12)"
+                        />
+                      </svg>
+                    </button>
+                    <button
+                      type="button"
+                      className="pt-element-nav-arrow pt-element-nav-arrow--down"
+                      disabled={navNeighbors.down == null}
+                      onClick={() => onNavigate('down')}
+                      aria-label="Vybrat prvek o řádek níž"
+                      title="Řádek dolů (↓)"
+                    >
+                      <svg
+                        className="pt-element-nav-arrow-icon"
+                        viewBox="0 0 24 24"
+                        aria-hidden
+                      >
+                        <path
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="2.5"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          d="M10 7l5 5-5 5"
+                          transform="rotate(90 12 12)"
+                        />
+                      </svg>
+                    </button>
+                    <button
+                      type="button"
+                      className="pt-element-nav-arrow pt-element-nav-arrow--left"
+                      disabled={navNeighbors.left == null}
+                      onClick={() => onNavigate('left')}
+                      aria-label="Vybrat prvek vlevo"
+                      title="Sloupec vlevo (←)"
+                    >
+                      <svg
+                        className="pt-element-nav-arrow-icon"
+                        viewBox="0 0 24 24"
+                        aria-hidden
+                      >
+                        <path
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="2.5"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          d="M14 7l-5 5 5 5"
+                        />
+                      </svg>
+                    </button>
+                    <button
+                      type="button"
+                      className="pt-element-nav-arrow pt-element-nav-arrow--right"
+                      disabled={navNeighbors.right == null}
+                      onClick={() => onNavigate('right')}
+                      aria-label="Vybrat prvek vpravo"
+                      title="Sloupec vpravo (→)"
+                    >
+                      <svg
+                        className="pt-element-nav-arrow-icon"
+                        viewBox="0 0 24 24"
+                        aria-hidden
+                      >
+                        <path
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="2.5"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          d="M10 7l5 5-5 5"
+                        />
+                      </svg>
+                    </button>
+                  </nav>
+                ) : null}
               </div>
             </div>
           </div>

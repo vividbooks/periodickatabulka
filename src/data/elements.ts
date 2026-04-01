@@ -252,37 +252,6 @@ export function gridPositionForLayout(
   return mode === 'expanded' ? gridPositionExpanded(z) : gridPosition(z)
 }
 
-export type GridNavDirection = 'up' | 'down' | 'left' | 'right'
-
-/**
- * Další prvek v daném směru po buňkách mřížky (prázdné buňky přeskočí).
- * Vrací null, když v tom směru už žádný prvek není.
- */
-export function neighborElementInDirection(
-  z: number,
-  layoutMode: PeriodicTableLayoutMode,
-  direction: GridNavDirection,
-): ChemicalElement | null {
-  const { cols, rows } = periodicTableGridDimensions(layoutMode)
-  const byKey = new Map<string, ChemicalElement>()
-  for (const el of ELEMENTS) {
-    const pos = gridPositionForLayout(el.z, layoutMode)
-    byKey.set(`${pos.row},${pos.col}`, el)
-  }
-  const dr =
-    direction === 'up' ? -1 : direction === 'down' ? 1 : 0
-  const dc =
-    direction === 'left' ? -1 : direction === 'right' ? 1 : 0
-  let { row, col } = gridPositionForLayout(z, layoutMode)
-  while (true) {
-    row += dr
-    col += dc
-    if (row < 1 || row > rows || col < 1 || col > cols) return null
-    const el = byKey.get(`${row},${col}`)
-    if (el) return el
-  }
-}
-
 export function periodicTableGridDimensions(mode: PeriodicTableLayoutMode): {
   cols: number
   rows: number
@@ -325,6 +294,54 @@ export const ELEMENTS: ChemicalElement[] = SYMBOLS.map((symbol, i) => {
     category: categoryForZ(z),
   }
 })
+
+export type GridNavDirection = 'up' | 'down' | 'left' | 'right'
+
+/**
+ * Další prvek v daném směru po buňkách mřížky (prázdné buňky přeskočí).
+ * Vrací null, když v tom směru už žádný prvek není.
+ */
+export function neighborElementInDirection(
+  z: number,
+  layoutMode: PeriodicTableLayoutMode,
+  direction: GridNavDirection,
+): ChemicalElement | null {
+  const { cols, rows } = periodicTableGridDimensions(layoutMode)
+  const byKey = new Map<string, ChemicalElement>()
+  for (const el of ELEMENTS) {
+    const pos = gridPositionForLayout(el.z, layoutMode)
+    byKey.set(`${pos.row},${pos.col}`, el)
+  }
+  const dr =
+    direction === 'up' ? -1 : direction === 'down' ? 1 : 0
+  const dc =
+    direction === 'left' ? -1 : direction === 'right' ? 1 : 0
+  let { row, col } = gridPositionForLayout(z, layoutMode)
+  while (true) {
+    row += dr
+    col += dc
+    if (row < 1 || row > rows || col < 1 || col > cols) return null
+    const el = byKey.get(`${row},${col}`)
+    if (el) return el
+  }
+}
+
+/** Střed buňky prvku v souřadnicích od levého horního rohu `.periodic-table-grid`. */
+export function elementCellCenterInPeriodicTableGridPx(
+  z: number,
+  layoutMode: PeriodicTableLayoutMode,
+): { x: number; y: number } {
+  const { row, col } = gridPositionForLayout(z, layoutMode)
+  const cell = PERIODIC_TABLE_CELL_PX
+  const gap = PERIODIC_TABLE_GAP_PX
+  const rowGap = gap + cell * 0.05
+  const colStep = cell + gap
+  const rowStep = cell + rowGap
+  return {
+    x: (col - 1) * colStep + cell / 2,
+    y: (row - 1) * rowStep + cell / 2,
+  }
+}
 
 export const GRID_COLS = 18
 export const GRID_ROWS = 9
