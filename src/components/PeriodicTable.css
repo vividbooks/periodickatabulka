@@ -1,0 +1,874 @@
+@font-face {
+  font-family: 'Cooper Light';
+  src: url('../../font/Cooper-Light.otf') format('opentype');
+  font-weight: 300;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Fenomen Sans';
+  src: url('../../font/Fenomen Sans Book.otf') format('opentype');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* Značky prvků — základní řez Fenomen Sans.otf */
+@font-face {
+  font-family: 'Fenomen Sans Symbol';
+  src: url('../../font/Fenomen Sans.otf') format('opentype');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Fenomen Sans';
+  src: url('../../font/Fenomen Sans Bold.otf') format('opentype');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Fenomen Sans';
+  src: url('../../font/Fenomen Sans Book Italic.otf') format('opentype');
+  font-weight: 400;
+  font-style: italic;
+  font-display: swap;
+}
+
+.periodic-table-root {
+  position: relative;
+  /* Viz `PERIODIC_TABLE_CELL_PX` v elements.ts — větší buňka = ostřejší při silném zoomu */
+  --pt-cell: 150px;
+  --pt-gap: 6px;
+  /* 2× proti původnímu = +100 % šířky obrysu (horní i spodní dlaždice) */
+  --pt-stroke-w: calc(3px * 1.1 * 1.2 * 2);
+  --pt-under-shift: calc(var(--pt-cell) * 0.05);
+  /* Shodně s `row-gap` mřížky — pro umístění nadpisu přes tři řádky */
+  --pt-row-gap: calc(var(--pt-gap) + var(--pt-under-shift));
+  /* Jedna dlaždice jako u prvků — navázání na mřížku (viz elements.ts) */
+  --pt-axis-col: var(--pt-cell);
+  --pt-axis-row: var(--pt-cell);
+  --pt-axis-face: #152054;
+  --pt-radius: calc(16px * 1.4);
+  padding: 0;
+  user-select: none;
+  background: transparent;
+  border-radius: 0;
+  display: inline-flex;
+  flex-direction: column;
+  align-items: stretch;
+}
+
+/* Tmavý panel jen kolem mřížky; popisek osy je mimo (bez druhé lišty u spodní legendy). */
+.periodic-table-panel {
+  padding: var(--pt-gap);
+  background: var(--surface);
+  border-radius: 4px;
+}
+
+/* Zamlžení buněk: třída z TS (inspector + legenda) */
+.pt-cell-slot--faded {
+  opacity: 0.42;
+  filter: saturate(0.72);
+  transition:
+    opacity 0.2s ease,
+    filter 0.2s ease;
+}
+
+.pt-empty--faded {
+  opacity: 0.32;
+  transition: opacity 0.2s ease;
+}
+
+/* Šipky a bobánek jen při otevřeném detailu prvku */
+.periodic-table-root[data-pt-dim-others] .pt-fblock-arrows,
+.periodic-table-root[data-pt-dim-others] .pt-fblock-expand-nub {
+  opacity: 0.5;
+  transition: opacity 0.2s ease;
+}
+
+/*
+ * Osa skupin (1–18 / 1–32) a period (1–7; u kompaktu znovu 6 a 7 u f-řádků).
+ */
+.pt-axis-frame {
+  display: grid;
+  grid-template-columns: var(--pt-axis-col) var(--pt-gap) max-content;
+  grid-template-rows: var(--pt-axis-row) var(--pt-gap) max-content;
+  align-items: start;
+}
+
+.pt-axis-corner {
+  grid-column: 1;
+  grid-row: 1;
+  place-self: stretch;
+  display: flex;
+  align-items: stretch;
+  justify-content: stretch;
+}
+
+.pt-col-labels {
+  grid-column: 3;
+  grid-row: 1;
+  display: grid;
+  column-gap: var(--pt-gap);
+  align-self: stretch;
+  box-sizing: border-box;
+}
+
+.pt-row-labels {
+  grid-column: 1;
+  grid-row: 3;
+  display: grid;
+  justify-items: stretch;
+  align-items: stretch;
+  box-sizing: border-box;
+}
+
+/* Jednoduchá tmavá dlaždice osy (bez obrysu / bez spodní podložky jako u prvků) */
+.pt-axis-tile {
+  position: relative;
+  width: var(--pt-cell);
+  height: var(--pt-cell);
+  flex-shrink: 0;
+  z-index: 1;
+}
+
+.pt-axis-tile__face {
+  position: relative;
+  box-sizing: border-box;
+  width: var(--pt-cell);
+  height: var(--pt-cell);
+  border-radius: var(--pt-radius);
+  background: var(--pt-axis-face);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1;
+}
+
+.pt-axis-tile--corner .pt-axis-tile__face {
+  pointer-events: none;
+}
+
+.pt-axis-tile--col,
+.pt-axis-tile--row {
+  cursor: help;
+}
+
+.pt-axis-tile--dim {
+  opacity: 0.38;
+  transition:
+    opacity 0.15s ease,
+    filter 0.15s ease;
+}
+
+.pt-axis-tile--band {
+  opacity: 1;
+  filter: brightness(1.1);
+}
+
+.pt-axis-num {
+  font-family:
+    system-ui,
+    -apple-system,
+    sans-serif;
+  /* základ 0,4× buňky, pak o 30 % menší ⇒ 0,28× */
+  font-size: calc(var(--pt-cell) * 0.28);
+  font-weight: 700;
+  line-height: 1;
+  color: var(--text-muted);
+  opacity: 0.98;
+  letter-spacing: -0.03em;
+  position: relative;
+  z-index: 1;
+}
+
+.pt-axis-num--col {
+  text-align: center;
+}
+
+.pt-axis-num--row {
+  text-align: center;
+}
+
+/*
+ * Jádro mřížky musí být nad .pt-axis-tile (z-index: 1): z-index uvnitř buňky (hover scale,
+ * rozkliknutý prvek scale 3×) platí jen v tomto kontextu — bez z-indexu zde by celá vrstva
+ * mřížky zůstala pod sourozenci s osami a přetékající dlaždice by byla pod čísly řádku/sloupce.
+ */
+.pt-grid-core {
+  grid-column: 3;
+  grid-row: 3;
+  position: relative;
+  z-index: 10;
+  display: inline-block;
+  vertical-align: top;
+  isolation: isolate;
+}
+
+.pt-table-title {
+  position: absolute;
+  left: calc(2 * (var(--pt-cell) + var(--pt-gap)));
+  top: 0;
+  width: calc(10 * var(--pt-cell) + 9 * var(--pt-gap));
+  height: calc(3 * var(--pt-cell) + 2 * var(--pt-row-gap));
+  margin: 0;
+  padding: 0;
+  pointer-events: none;
+  z-index: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: calc(var(--pt-cell) * 0.047);
+  text-align: center;
+  font-family:
+    'Cooper Light',
+    Georgia,
+    'Times New Roman',
+    serif;
+  font-weight: 300;
+  line-height: 1.05;
+  letter-spacing: 0.02em;
+  color: var(--text-primary);
+  opacity: 0.98;
+  text-shadow: 0 1px 2px rgb(0 0 0 / 0.45);
+}
+
+.periodic-table-root[data-pt-layout='expanded'] .pt-table-title {
+  width: calc(24 * var(--pt-cell) + 23 * var(--pt-gap));
+}
+
+.periodic-table-root[data-pt-dim-others] .pt-table-title {
+  opacity: 0.55;
+  transition: opacity 0.2s ease;
+}
+
+.periodic-table-root[data-pt-dim-others] .pt-axis-tile {
+  opacity: 0.48;
+  transition: opacity 0.2s ease;
+}
+
+.pt-table-title__line {
+  display: block;
+  max-width: 95%;
+  /* 0,8× buňky + 30 % ⇒ 1,04×; oba řádky stejně */
+  font-size: calc(var(--pt-cell) * 1.04);
+  letter-spacing: 0.02em;
+}
+
+/*
+ * LOD podle měřítka plátna (data-pt-lod 0…4 z PeriodicTable.tsx):
+ * 0 jen značka → 1 +Z → 2 +český název → 3 +Ar → 4 +latina, χ a ikony stavu
+ */
+.periodic-table-root[data-pt-lod='0'] .pt-znum,
+.periodic-table-root[data-pt-lod='0'] .pt-names,
+.periodic-table-root[data-pt-lod='0'] .pt-ar,
+.periodic-table-root[data-pt-lod='0'] .pt-kin {
+  display: none;
+}
+
+.periodic-table-root[data-pt-lod='1'] .pt-names,
+.periodic-table-root[data-pt-lod='1'] .pt-ar,
+.periodic-table-root[data-pt-lod='1'] .pt-kin {
+  display: none;
+}
+
+.periodic-table-root[data-pt-lod='2'] .pt-name-la,
+.periodic-table-root[data-pt-lod='2'] .pt-ar,
+.periodic-table-root[data-pt-lod='2'] .pt-kin {
+  display: none;
+}
+
+.periodic-table-root[data-pt-lod='3'] .pt-name-la,
+.periodic-table-root[data-pt-lod='3'] .pt-kin {
+  display: none;
+}
+
+/* Značky stavu / radioaktivity / umělé — až při dostředivém zoomu (jako χ a latina) */
+.periodic-table-root:not([data-pt-lod='4']) .pt-tile-marker {
+  display: none;
+}
+
+/*
+ * Otevřený detail: vybraná dlaždice je CSS 3× — ale LOD se řídí zoomem plátna, ne tím zvětšením.
+ * Bez přepsání by při oddálené tabulce zůstala jen značka. Tady vynutíme plný obsah jako u LOD 4.
+ */
+.periodic-table-root[data-pt-dim-others] .pt-cell-slot--selected .pt-znum,
+.periodic-table-root[data-pt-dim-others] .pt-cell-slot--selected .pt-names,
+.periodic-table-root[data-pt-dim-others] .pt-cell-slot--selected .pt-ar,
+.periodic-table-root[data-pt-dim-others] .pt-cell-slot--selected .pt-kin {
+  display: block;
+}
+
+.periodic-table-root[data-pt-dim-others] .pt-cell-slot--selected .pt-name-la {
+  display: block;
+}
+
+.periodic-table-root[data-pt-dim-others] .pt-cell-slot--selected .pt-tile-marker {
+  display: flex;
+}
+
+.periodic-table-grid-wrap {
+  position: relative;
+  display: inline-flex;
+  flex-direction: column;
+  align-items: stretch;
+  vertical-align: top;
+}
+
+.pt-axis-caption {
+  /* ještě o 30 px níž oproti předchozímu stavu → mezera celkem 2×30 px nad rámec --pt-gap */
+  margin: calc(var(--pt-gap) + 60px) 0 0;
+  padding: 0 0.25rem;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+  border: none;
+  background: transparent;
+  border-radius: 0;
+  color: var(--text-primary);
+  /* 0,7× buňky − 30 % ⇒ 0,49× */
+  font-size: calc(var(--pt-cell) * 0.49);
+  line-height: 1.45;
+  font-weight: 500;
+  text-align: center;
+  font-family:
+    'Fenomen Sans',
+    system-ui,
+    -apple-system,
+    sans-serif;
+}
+
+/* Místo pod spodní řádek pro absolutně umístěný bobánek pod Ac (výška i v elements.ts → PERIODIC_TABLE_EXPANDED_NUB_EXTRA_PX) */
+.periodic-table-grid-wrap--expanded {
+  padding-bottom: 52px;
+}
+
+.periodic-table-grid {
+  display: grid;
+  column-gap: var(--pt-gap);
+  /* Mez řádků zahrnuje posun podložky dolů, ať se stíny neřežou */
+  row-gap: calc(var(--pt-gap) + var(--pt-under-shift));
+  width: max-content;
+  transition:
+    opacity 0.2s ease,
+    filter 0.2s ease;
+}
+
+/* Spoje La→Ce, Ac→Th ve zkráceném rozvržení (pod dlaždicemi) */
+.pt-fblock-arrows {
+  position: absolute;
+  left: 0;
+  top: 0;
+  pointer-events: none;
+  z-index: 0;
+  overflow: visible;
+}
+
+.pt-fblock-arrows__path {
+  fill: none;
+  stroke-width: 5.5px;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.pt-fblock-arrows__path--lan {
+  stroke: #0d8d5e;
+}
+
+.pt-fblock-arrows__path--act {
+  stroke: #dd80ff;
+}
+
+.pt-fblock-arrows__head-lan {
+  fill: #0d8d5e;
+  stroke: #0d8d5e;
+  stroke-width: 1.2px;
+  stroke-linejoin: round;
+}
+
+.pt-fblock-arrows__head-act {
+  fill: #dd80ff;
+  stroke: #dd80ff;
+  stroke-width: 1.2px;
+  stroke-linejoin: round;
+}
+
+/* Tmavě modrý štítek pod fialovou šipkou (jako na mocku) */
+.pt-fblock-expand-nub {
+  position: absolute;
+  box-sizing: border-box;
+  margin: 0;
+  padding: 8px 14px;
+  border: 1px solid rgb(255 255 255 / 0.14);
+  border-radius: 18px;
+  background: #0f217d;
+  box-shadow:
+    0 1px 0 0 rgb(255 255 255 / 0.08) inset,
+    0 4px 14px rgb(0 0 0 / 0.35);
+  cursor: pointer;
+  z-index: 6;
+  color: #ffffff;
+  font-family:
+    'Fenomen Sans',
+    system-ui,
+    -apple-system,
+    sans-serif;
+  font-size: 0.75rem;
+  font-weight: 600;
+  line-height: 1.2;
+  letter-spacing: -0.01em;
+  white-space: nowrap;
+  display: block;
+  transform: translateX(-50%);
+}
+
+.pt-fblock-expand-nub:hover {
+  background: #152894;
+  box-shadow:
+    0 1px 0 0 rgb(255 255 255 / 0.1) inset,
+    0 5px 16px rgb(0 0 0 / 0.38);
+}
+
+.pt-fblock-expand-nub:active {
+  background: #0c1a66;
+  transform: translateX(-50%) scale(0.98);
+}
+
+.pt-fblock-expand-nub:focus-visible {
+  outline: 2px solid #7eb8ff;
+  outline-offset: 2px;
+}
+
+.pt-empty {
+  position: relative;
+  min-width: var(--pt-cell);
+  min-height: var(--pt-cell);
+  pointer-events: none;
+  z-index: 1;
+}
+
+/*
+ * Paleta: --tile-rim-top = horní vnitřní obrys tváře, --tile-rim-bot = spodní „dlaždice“ (podložka).
+ */
+.pt-fill-kov {
+  /* +30 % k bílé = výrazně světlejší žlutá */
+  --tile-face: color-mix(in srgb, #fbee7b 70%, white 30%);
+  --tile-ink: #444444;
+  --tile-sky: #c9b358;
+  --tile-rim-top: #f6af34;
+  --tile-rim-bot: #ffb5a1;
+}
+
+.pt-fill-metalloid {
+  --tile-face: #f8485e;
+  --tile-ink: #000b2e;
+  --tile-sky: #c4364a;
+  --tile-rim-top: #ff6f82;
+  --tile-rim-bot: #8b1028;
+}
+
+.pt-fill-nekov {
+  --tile-face: #5e9fff;
+  --tile-ink: #ffffff;
+  --tile-sky: #3d7ddb;
+  --tile-rim-top: #8ec6ff;
+  --tile-rim-bot: #244f9a;
+}
+
+.pt-cell-slot {
+  position: relative;
+  width: var(--pt-cell);
+  height: var(--pt-cell);
+  z-index: 1;
+  transform: scale(1);
+  transform-origin: center center;
+  transition: transform 0.22s cubic-bezier(0.28, 0.9, 0.45, 1);
+}
+
+.pt-cell-slot:hover {
+  z-index: 5;
+  transform: scale(1.18);
+}
+
+.pt-cell-slot:has(.pt-cell:focus-visible) {
+  z-index: 6;
+  transform: scale(1.18);
+}
+
+.pt-cell-slot--selected {
+  z-index: 2;
+  opacity: 1 !important;
+  filter: none !important;
+}
+
+/* Spodní dlaždice: výplň + stejně široký vnitřní obrys jako horní plocha */
+.pt-cell-underlay {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: var(--pt-cell);
+  height: var(--pt-cell);
+  box-sizing: border-box;
+  border-radius: var(--pt-radius);
+  background: var(--tile-rim-bot);
+  box-shadow:
+    inset 0 0 0 var(--pt-stroke-w)
+      color-mix(in srgb, var(--tile-rim-bot) 72%, white 28%),
+    inset 0 1px 0 0 rgb(255 255 255 / 0.14);
+  transform: translateY(var(--pt-under-shift));
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* Horní plocha: výplň + vnitřní obrys (žádný tlustý spodní border — ten je až v podložce) */
+.pt-cell {
+  position: relative;
+  box-sizing: border-box;
+  width: var(--pt-cell);
+  height: var(--pt-cell);
+  padding: 9px 11px 8px;
+  border: none;
+  border-radius: var(--pt-radius);
+  box-shadow:
+    inset 0 0 0 var(--pt-stroke-w) var(--tile-rim-top),
+    inset 0 1px 0 0 rgb(255 255 255 / 0.18);
+
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  justify-content: flex-end;
+
+  font-family:
+    'Fenomen Sans',
+    system-ui,
+    -apple-system,
+    sans-serif;
+
+  color: var(--tile-ink);
+  background: var(--tile-face);
+  cursor: pointer;
+  z-index: 1;
+
+  transition: filter 0.18s ease;
+}
+
+/* Skupiny + sloupec 1: proměnné na slotu → podložka i tvář stejná rodina barev */
+.pt-cell-slot.pt-ring-alkaline-earth {
+  --tile-rim-top: #c99578;
+  --tile-rim-bot: #4a281d;
+}
+.pt-cell-slot.pt-ring-halogen {
+  --tile-rim-top: #ffffff;
+  --tile-rim-bot: #9aa3b5;
+}
+.pt-cell-slot.pt-ring-noble {
+  --tile-rim-top: #ffcf6a;
+  --tile-rim-bot: #c26f0e;
+}
+.pt-cell-slot.pt-ring-lanthanide {
+  --tile-rim-top: #0d8d5e;
+  --tile-rim-bot: #5fffbe;
+}
+
+.pt-cell-slot.pt-ring-lanthanide.pt-fill-kov {
+  --tile-ink: #0d8d5e;
+}
+.pt-cell-slot.pt-ring-actinide {
+  --tile-rim-top: #dd80ff;
+  --tile-rim-bot: #dd80ff;
+}
+
+.pt-cell-slot.pt-ring-actinide.pt-fill-kov {
+  --tile-ink: #c733f4;
+}
+
+/*
+ * Sloupec 1 (H, Li, Na, …; He není ve sl. 1):
+ * horní stroke #59A2FF, popisek + spodní dlaždice #0019FF (Vodík: bílý text na modré tváři).
+ */
+.pt-cell-slot.pt-col-1 {
+  --tile-rim-top: #59a2ff;
+  --tile-rim-bot: #0019ff;
+}
+
+.pt-cell-slot.pt-col-1.pt-fill-kov {
+  --tile-ink: #0019ff;
+}
+
+.pt-cell-slot.pt-col-1.pt-fill-nekov {
+  --tile-ink: #ffffff;
+}
+
+/* Druhý sloupec: Ca, Sr, Ba, Ra — obrys, podložka a písmo #F03B50 (Be/Mg beze změny) */
+.pt-cell-slot.pt-col-2-ca-ra {
+  --tile-rim-top: #f03b50;
+  --tile-rim-bot: color-mix(in srgb, #f03b50 50%, black 50%);
+}
+
+.pt-cell-slot.pt-col-2-ca-ra.pt-fill-kov {
+  --tile-ink: #f03b50;
+}
+
+/* C, N, O, P, S — písmo #00415A, stroke a spodní dlaždice #126CB0 */
+.pt-cell-slot.pt-nonmetal-cnops {
+  --tile-rim-top: #126cb0;
+  --tile-rim-bot: #126cb0;
+}
+
+.pt-cell-slot.pt-nonmetal-cnops.pt-fill-nekov {
+  --tile-ink: #00415a;
+}
+
+/* Astat (85): červená tvář, bílý stroke a písmo, růžová spodní dlaždice */
+.pt-cell-slot.pt-element-at {
+  --tile-face: #f03b50;
+  --tile-rim-top: #ffffff;
+  --tile-rim-bot: #f9baba;
+}
+
+.pt-cell-slot.pt-element-at.pt-fill-nekov {
+  --tile-ink: #ffffff;
+}
+
+.pt-cell-slot:hover .pt-cell,
+.pt-cell-slot:has(.pt-cell:focus-visible) .pt-cell {
+  filter: brightness(1.04);
+}
+
+.pt-cell-slot:hover .pt-cell.pt-selected,
+.pt-cell-slot:has(.pt-cell:focus-visible) .pt-cell.pt-selected {
+  filter: brightness(1.09);
+}
+
+.pt-cell:focus-visible {
+  outline: 2px solid #7eb8ff;
+  outline-offset: 3px;
+}
+
+.pt-selected {
+  filter: brightness(1.06);
+}
+
+/*
+ * Otevřený detail: nevybrané buňky bez scale; vybraná dlaždice 3× kvůli čitelnosti údajů na ní.
+ * Hover na nevybrané musí zůstat scale(1) — vybraný slot má scale(3) i při hoveru.
+ */
+.periodic-table-root[data-pt-dim-others]
+  .pt-cell-slot:not(.pt-cell-slot--selected):hover,
+.periodic-table-root[data-pt-dim-others]
+  .pt-cell-slot:not(.pt-cell-slot--selected):has(.pt-cell:focus-visible) {
+  transform: scale(1);
+  z-index: 5;
+}
+
+.periodic-table-root[data-pt-dim-others] .pt-cell-slot--selected {
+  z-index: 50;
+  opacity: 1 !important;
+  filter: none !important;
+  /* --pt-selected-scale z TS: max 3, při velkém zoomu menší, ať dlaždice nepřeteče plátno */
+  transform: scale(var(--pt-selected-scale, 3));
+  transform-origin: center center;
+}
+
+.periodic-table-root[data-pt-dim-others] .pt-cell-slot--selected:hover,
+.periodic-table-root[data-pt-dim-others]
+  .pt-cell-slot--selected:has(.pt-cell:focus-visible) {
+  z-index: 55;
+  transform: scale(var(--pt-selected-scale, 3));
+}
+
+/* Silnější kontrast než základní .pt-cell-slot--faded */
+.periodic-table-root[data-pt-dim-others] .pt-cell-slot--faded {
+  opacity: 0.28 !important;
+  filter: saturate(0.52) brightness(0.9) !important;
+}
+
+.periodic-table-root[data-pt-dim-others] .pt-cell.pt-selected {
+  filter: none;
+}
+
+/* Hover nad nevybranými buňkami (ne zamlžené = plný jas) */
+.periodic-table-root[data-pt-dim-others]
+  .pt-cell-slot:not(.pt-cell-slot--faded):not(.pt-cell-slot--selected):hover
+  .pt-cell,
+.periodic-table-root[data-pt-dim-others]
+  .pt-cell-slot:not(.pt-cell-slot--faded):not(.pt-cell-slot--selected):has(.pt-cell:focus-visible)
+  .pt-cell {
+  filter: brightness(1.12);
+}
+
+/* Zamlžená buňka při hoveru — výraznější než klidový stav */
+.periodic-table-root[data-pt-dim-others] .pt-cell-slot--faded:hover,
+.periodic-table-root[data-pt-dim-others] .pt-cell-slot--faded:has(.pt-cell:focus-visible) {
+  opacity: 0.62 !important;
+  filter: saturate(0.72) brightness(1.05) !important;
+}
+
+.periodic-table-root[data-pt-dim-others] .pt-cell-slot--selected:hover .pt-cell,
+.periodic-table-root[data-pt-dim-others]
+  .pt-cell-slot--selected:has(.pt-cell:focus-visible)
+  .pt-cell {
+  filter: brightness(1.06);
+}
+
+/* χ — pravý horní roh, kompaktní tučná */
+.pt-kin {
+  position: absolute;
+  z-index: 2;
+  top: calc(7px + var(--pt-cell) * 0.05);
+  right: calc(9px + var(--pt-cell) * 0.05);
+  font-size: calc(10px * 1.3);
+  font-family:
+    'Fenomen Sans Symbol',
+    'Fenomen Sans',
+    system-ui,
+    -apple-system,
+    sans-serif;
+  font-weight: 400;
+  line-height: 1;
+  letter-spacing: -0.02em;
+}
+
+.pt-kin--na {
+  opacity: 0.42;
+}
+
+/* Ikony stavu / radioaktivity / umělé — rohy jako ve školní tabulce */
+.pt-tile-marker {
+  position: absolute;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--tile-ink);
+  opacity: 0.9;
+  pointer-events: none;
+}
+
+.pt-tile-marker__svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+  fill: currentColor;
+}
+
+.pt-tile-marker--tl {
+  top: calc(5px + var(--pt-cell) * 0.04);
+  left: calc(7px + var(--pt-cell) * 0.04);
+  width: calc(var(--pt-cell) * 0.2);
+  height: calc(var(--pt-cell) * 0.2);
+}
+
+/* Značka uprostřed dlaždice (Š+V); Z vlevo na svislé ose */
+.pt-symbol-block {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.pt-znum-stack {
+  position: absolute;
+  left: 11px;
+  top: 50%;
+  transform: translateY(calc(-50% + var(--pt-cell) * 0.2));
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: calc(var(--pt-cell) * 0.022);
+  pointer-events: none;
+}
+
+.pt-znum-stack .pt-znum {
+  position: static;
+  transform: none;
+}
+
+.pt-tile-marker--under-z {
+  position: relative;
+  top: auto;
+  left: auto;
+  width: calc(var(--pt-cell) * 0.17);
+  height: calc(var(--pt-cell) * 0.17);
+  flex-shrink: 0;
+}
+
+.pt-znum {
+  position: absolute;
+  left: 11px;
+  top: 50%;
+  transform: translateY(calc(-50% + var(--pt-cell) * 0.2));
+  font-size: calc(17px * 1.3);
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: -0.03em;
+}
+
+.pt-sym {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  /* +5 % pod střed, pak o 10 % výšky buňky nahoru ⇒ −5 % od středu */
+  transform: translate(-50%, calc(-50% - var(--pt-cell) * 0.05));
+  /* … × 1,3 (+30 % značka) */
+  font-size: calc(32px * 1.3 * 1.2 * 1.2 * 1.3);
+  font-family:
+    'Fenomen Sans Symbol',
+    'Fenomen Sans',
+    system-ui,
+    -apple-system,
+    sans-serif;
+  font-weight: 400;
+  line-height: 1;
+  letter-spacing: -0.04em;
+}
+
+.pt-names {
+  position: relative;
+  z-index: 1;
+  text-align: center;
+  margin-top: 0;
+  padding: 0 4px;
+}
+
+.pt-name-cs {
+  display: block;
+  font-size: calc(11px * 1.5);
+  font-family:
+    'Fenomen Sans Symbol',
+    'Fenomen Sans',
+    system-ui,
+    -apple-system,
+    sans-serif;
+  font-weight: 400;
+  line-height: 1.2;
+  letter-spacing: -0.02em;
+}
+
+.pt-name-la {
+  display: block;
+  margin-top: calc(3px * 0.3);
+  font-size: 9.5px;
+  font-weight: 400;
+  font-style: italic;
+  line-height: 1.15;
+  opacity: 0.92;
+}
+
+/* Ar — spodní střed, výrazná tučná číslice */
+.pt-ar {
+  position: relative;
+  z-index: 1;
+  text-align: center;
+  font-size: 13px;
+  font-weight: 700;
+  margin-top: calc(6px * 0.3);
+  line-height: 1.15;
+  letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums;
+}

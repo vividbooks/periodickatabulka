@@ -1,0 +1,123 @@
+.app-legend-bar {
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 14px 12px;
+  overflow-x: auto;
+  overflow-y: hidden;
+  border-top: none;
+  background: transparent;
+  -webkit-overflow-scrolling: touch;
+}
+
+.app-legend-btn {
+  flex: 0 0 auto;
+  font: inherit;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  white-space: nowrap;
+  padding: 9px 14px 11px;
+  border-radius: 10px;
+  cursor: pointer;
+  border: 2px solid transparent;
+  transition:
+    opacity 0.18s ease,
+    filter 0.18s ease,
+    transform 0.18s ease,
+    box-shadow 0.18s ease;
+  box-shadow: inset 0 1px 0 0 rgb(255 255 255 / 0.06);
+}
+
+.app-legend-btn:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+
+.app-legend-btn--on {
+  opacity: 1;
+  filter: none;
+  transform: scale(1.04);
+  z-index: 1;
+  box-shadow:
+    0 0 0 1px rgb(255 255 255 / 0.12),
+    inset 0 1px 0 0 rgb(255 255 255 / 0.14);
+}
+
+.app-legend-btn--off {
+  opacity: 0.44;
+  filter: saturate(0.72) brightness(0.92);
+  transform: scale(0.97);
+}
+
+.app-legend-halogen-mark {
+  margin-right: 4px;
+  color: #42a5f5;
+  font-weight: 700;
+}
+
+/* --- Varianty tlačítek (blízko mocku) --- */
+
+.app-legend-btn--kovy {
+  background: #fff0b3;
+  color: #1a1a24;
+  border-color: #e8d78f;
+}
+
+.app-legend-btn--polokovy {
+  background: #ff8a76;
+  color: #1a1210;
+  border-color: #e86b5a;
+}
+
+.app-legend-btn--nekovy {
+  background: #42b4f5;
+  color: #ffffff;
+  border-color: #1e88c9;
+}
+
+.app-legend-btn--alkali {
+  background: #0d1538;
+  color: #e3f2ff;
+  border-color: #448aff;
+  box-shadow: inset 0 0 0 1px rgb(68 138 255 / 0.25);
+}
+
+.app-legend-btn--alkaline {
+  background: #120a18;
+  color: #ffb3c0;
+  border-color: #f03b50;
+  box-shadow: inset 0 0 0 1px rgb(240 59 80 / 0.2);
+}
+
+.app-legend-btn--halogen {
+  background: #080e28;
+  color: #ffffff;
+  border-width: 3px;
+  border-color: #e8ecf5;
+  box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.05);
+}
+
+.app-legend-btn--noble {
+  background: #0a0e24;
+  color: #ffe082;
+  border-color: #ffa726;
+  box-shadow: inset 0 0 0 1px rgb(255 167 38 / 0.2);
+}
+
+.app-legend-btn--lanthanide {
+  background: #061a14;
+  color: #5fffbe;
+  border-color: #0d8d5e;
+  box-shadow: inset 0 0 0 1px rgb(13 141 94 / 0.25);
+}
+
+.app-legend-btn--actinide {
+  background: #140818;
+  color: #e8b8ff;
+  border-color: #c733f4;
+  box-shadow: inset 0 0 0 1px rgb(199 51 244 / 0.22);
+}

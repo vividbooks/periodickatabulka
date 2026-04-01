@@ -1,0 +1,690 @@
+.app-shell {
+  display: flex;
+  flex-direction: column;
+  height: 100svh;
+  min-height: 0;
+  background: var(--surface);
+}
+
+.app-body {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: row;
+  align-items: stretch;
+  background: var(--surface);
+}
+
+.app-canvas-wrap {
+  flex: 1;
+  min-width: 0;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+/*
+ * Padding (ne margin) zmenší obsahovou šířku — viewport má správné clientWidth pro výpočet posunu kamery.
+ * Hodnota = šířka .app-inspector (--app-inspector-width v index.css).
+ */
+.app-canvas-wrap--inspector {
+  box-sizing: border-box;
+  padding-right: var(--app-inspector-width);
+  transition: padding-right 0.2s ease;
+}
+
+.app-legend-footer {
+  position: relative;
+  z-index: 1;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 4px;
+  min-height: 0;
+  padding: 0 6px 0 8px;
+  transition:
+    opacity 0.22s ease,
+    filter 0.22s ease;
+}
+
+.app-legend-footer--dimmed {
+  opacity: 0.38;
+  filter: brightness(0.58) saturate(0.85);
+}
+
+@media (min-width: 721px) {
+  .app-legend-footer--dimmed {
+    /* Legenda a pravá šipka zůstanou vlevo od inspektoru (stejná šířka jako panel) */
+    padding-right: calc(var(--app-inspector-width) + 6px);
+  }
+}
+
+.app-legend-footer-scroll {
+  flex: 1;
+  min-width: 0;
+  overflow-x: auto;
+  overflow-y: hidden;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: thin;
+  scrollbar-color: rgb(107 159 255 / 0.45) rgb(0 0 52 / 0.35);
+}
+
+.app-legend-footer-scroll::-webkit-scrollbar {
+  height: 5px;
+}
+
+.app-legend-footer-scroll::-webkit-scrollbar-track {
+  background: rgb(0 0 52 / 0.25);
+  border-radius: 4px;
+}
+
+.app-legend-footer-scroll::-webkit-scrollbar-thumb {
+  background: rgb(107 159 255 / 0.42);
+  border-radius: 4px;
+}
+
+/* Scrolluje jen legenda — vlastní overflow vypnout */
+.app-legend-footer-scroll .app-legend-bar {
+  overflow: visible;
+  width: max-content;
+  max-width: none;
+}
+
+.app-legend-scroll-btn {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 48px;
+  padding: 0;
+  margin: 0;
+  color: var(--text-primary);
+  background: rgb(10 15 46 / 0.92);
+  border: 1px solid rgb(107 159 255 / 0.35);
+  border-radius: 10px;
+  cursor: pointer;
+  box-shadow: inset 0 1px 0 0 rgb(255 255 255 / 0.06);
+  transition:
+    background 0.15s ease,
+    border-color 0.15s ease,
+    opacity 0.15s ease;
+}
+
+.app-legend-scroll-btn:hover:not(:disabled) {
+  background: var(--surface-hover);
+  border-color: rgb(107 159 255 / 0.55);
+}
+
+.app-legend-scroll-btn:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+
+.app-legend-scroll-btn:disabled {
+  opacity: 0.3;
+  cursor: default;
+}
+
+.app-legend-scroll-btn--hidden {
+  visibility: hidden;
+  width: 0 !important;
+  min-width: 0 !important;
+  height: 0 !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  border: none !important;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.app-legend-scroll-btn-icon {
+  display: block;
+}
+
+/* Bobánek ve stylu legendy — bez vnějšího rámečku */
+.app-zoom-control {
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 8px;
+  margin: 10px 0 12px;
+  padding: 7px 10px 9px;
+  border-radius: 10px;
+  border: none;
+  background: #0d1538;
+  color: #e3f2ff;
+  box-shadow: inset 0 1px 0 0 rgb(255 255 255 / 0.08);
+}
+
+.app-zoom-btn {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  padding: 0;
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+  border: 2px solid rgb(68 138 255 / 0.35);
+  border-radius: 8px;
+  background: rgb(8 14 40 / 0.85);
+  box-shadow: inset 0 1px 0 0 rgb(255 255 255 / 0.06);
+  transition:
+    background 0.16s ease,
+    border-color 0.16s ease,
+    transform 0.16s ease;
+}
+
+.app-zoom-btn:hover {
+  background: rgb(20 32 72 / 0.95);
+  border-color: rgb(107 159 255 / 0.55);
+}
+
+.app-zoom-btn:active {
+  transform: scale(0.96);
+}
+
+.app-zoom-btn:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+
+.app-zoom-btn-icon {
+  display: block;
+}
+
+.app-zoom-slider {
+  /* úsporná šířka */
+  width: min(14vw, 68px);
+  height: 5px;
+  cursor: pointer;
+  accent-color: #6b9fff;
+}
+
+.app-zoom-slider:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 3px;
+  border-radius: 4px;
+}
+
+.app-inspector {
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 30;
+  box-sizing: border-box;
+  width: var(--app-inspector-width);
+  padding: 16px;
+  border-left: 1px solid var(--border);
+  background: var(--surface-panel);
+  overflow-y: auto;
+  min-height: 0;
+  box-shadow: -10px 0 28px rgb(0 0 20 / 0.45);
+}
+
+.inspector-header {
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  margin: 0 0 16px;
+}
+
+.inspector-header-main {
+  min-width: 0;
+  flex: 1;
+}
+
+.inspector-header .inspector-title {
+  margin: 0;
+}
+
+.inspector-header .inspector-name {
+  margin: 4px 0 0;
+}
+
+.inspector-header-actions {
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  gap: 2px;
+  flex-shrink: 0;
+}
+
+.inspector-fs {
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-muted);
+  background: transparent;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.inspector-fs:hover {
+  color: var(--text-primary);
+  background: var(--surface-hover);
+}
+
+.inspector-fs:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+
+.inspector-fs[aria-pressed='true'] {
+  color: var(--text-primary);
+}
+
+.inspector-fs-icon {
+  display: block;
+}
+
+.inspector-close-x {
+  flex-shrink: 0;
+  margin: -4px -6px 0 0;
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: system-ui, sans-serif;
+  font-size: 1.5rem;
+  font-weight: 300;
+  line-height: 1;
+  color: var(--text-muted);
+  background: transparent;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.inspector-close-x:hover {
+  color: var(--text-primary);
+  background: var(--surface-hover);
+}
+
+.inspector-close-x:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+
+.inspector-tabs {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin: 0 0 10px;
+}
+
+.inspector-tabs__btn {
+  flex: 1 1 auto;
+  min-width: 0;
+  padding: 6px 8px;
+  font: inherit;
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  color: var(--text-muted);
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  cursor: pointer;
+  transition:
+    background 0.15s ease,
+    color 0.15s ease,
+    border-color 0.15s ease;
+}
+
+.inspector-tabs__btn:hover {
+  color: var(--text-primary);
+  background: var(--surface-hover);
+}
+
+.inspector-tabs__btn--active {
+  color: var(--text-primary);
+  border-color: rgb(107 159 255 / 0.45);
+  background: rgb(20 32 72 / 0.55);
+}
+
+.inspector-tabs__btn:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+
+.inspector-tab-panel {
+  min-height: 0;
+}
+
+.inspector-section-title {
+  margin: 16px 0 8px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.inspector-section-title--compact {
+  margin: 0 0 6px;
+  font-size: 0.7rem;
+}
+
+.inspector-title {
+  margin: 0;
+  font-size: 1.75rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.inspector-name {
+  margin: 4px 0 16px;
+  font-size: 0.9375rem;
+  color: var(--text-muted);
+}
+
+.inspector-dl {
+  margin: 0;
+  font-size: 0.8125rem;
+}
+
+.inspector-dl--compact {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px 8px;
+  font-size: 0.75rem;
+}
+
+.inspector-dl--compact .inspector-info-block {
+  margin: 0;
+  padding: 6px 8px 8px;
+}
+
+.inspector-dl--compact .inspector-info-block--full {
+  grid-column: 1 / -1;
+}
+
+.inspector-dl--compact dt {
+  margin: 0 0 3px;
+  font-size: 0.62rem;
+}
+
+.inspector-dl--compact dd {
+  line-height: 1.3;
+}
+
+/* Stejný vizuál jako `.atom2d-wrap` v Atom2DModel.css */
+.inspector-info-block {
+  margin: 0 0 10px;
+  padding: 10px 10px 12px;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.06);
+  overflow: hidden;
+}
+
+.inspector-info-block:last-child {
+  margin-bottom: 0;
+}
+
+.inspector-zs-tip.inspector-info-block {
+  margin-top: 14px;
+}
+
+.inspector-dl dt {
+  margin: 0 0 6px;
+  color: var(--text-muted);
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.inspector-dl dd {
+  margin: 0;
+  color: var(--text-primary);
+}
+
+.inspector-sub {
+  display: block;
+  margin-top: 2px;
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  line-height: 1.35;
+}
+
+.inspector-dt-sub {
+  font-weight: 400;
+  opacity: 0.85;
+}
+
+.inspector-dd-cap::first-letter {
+  text-transform: uppercase;
+}
+
+.inspector-dd-mono {
+  font-variant-numeric: tabular-nums;
+  font-size: 0.8125rem;
+  line-height: 1.4;
+}
+
+.inspector-zs-tip {
+  margin: 14px 0 0;
+  font-size: 0.8125rem;
+  line-height: 1.45;
+  color: var(--text-primary);
+}
+
+.inspector-dl--compact + .inspector-zs-tip,
+.inspector-dl.inspector-dl--compact ~ .inspector-zs-tip {
+  margin-top: 8px;
+  font-size: 0.72rem;
+  line-height: 1.4;
+  padding: 8px 8px 10px;
+}
+
+.inspector-close {
+  margin-top: 16px;
+  padding: 8px 12px;
+  font: inherit;
+  font-size: 0.8125rem;
+  border-radius: 6px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text-primary);
+  cursor: pointer;
+}
+
+.inspector-close:hover {
+  background: var(--surface-hover);
+}
+
+.inspector-empty {
+  margin: 0;
+  font-size: 0.875rem;
+  color: var(--text-muted);
+  line-height: 1.4;
+}
+
+.app-inspector--fullscreen {
+  position: fixed;
+  inset: 0;
+  z-index: 400;
+  width: 100% !important;
+  max-width: none !important;
+  max-height: none !important;
+  border-left: none !important;
+  display: flex;
+  flex-direction: column;
+  padding: 0;
+  overflow: hidden;
+}
+
+.inspector-fullscreen-split {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: row;
+  align-items: stretch;
+}
+
+/* Celá obrazovka: polovina atom vlevo, polovina panel vpravo */
+.inspector-fullscreen-split .inspector-fullscreen-atom {
+  flex: 1 1 50%;
+  min-width: 0;
+}
+
+.inspector-fullscreen-split .inspector-fullscreen-info {
+  flex: 1 1 50%;
+  width: 50%;
+  min-width: 0;
+  max-width: none;
+}
+
+.inspector-fullscreen-atom {
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  background: var(--surface);
+  border-right: 1px solid var(--border);
+}
+
+.inspector-fullscreen-atom-canvas-wrap {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.inspector-fullscreen-atom-canvas-wrap .inspector-atom-canvas.infinite-canvas-viewport {
+  flex: 1;
+  min-height: 0;
+  background: var(--surface);
+}
+
+/* Přehrávání + lupa − / + + slider — uprostřed dole nad modelem, bez samostatné lišty */
+.inspector-atom-toolbar {
+  position: absolute;
+  left: 50%;
+  bottom: 14px;
+  z-index: 2;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  border: none;
+  background: transparent;
+  pointer-events: none;
+}
+
+.inspector-atom-toolbar > * {
+  pointer-events: auto;
+}
+
+.inspector-atom-play-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.85rem;
+  line-height: 1;
+}
+
+/* Stejná úsporná šířka jako `.app-zoom-slider` na hlavní obrazovce */
+.inspector-atom-zoom-slider {
+  width: min(14vw, 68px);
+  flex: none;
+}
+
+.inspector-fullscreen-info {
+  flex: 0 0 var(--app-inspector-width);
+  width: var(--app-inspector-width);
+  max-width: 100%;
+  box-sizing: border-box;
+  overflow-y: auto;
+  padding: 16px;
+  min-height: 0;
+  background: var(--surface-panel);
+}
+
+.inspector-fullscreen-righthead {
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  margin: 0 0 16px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--border);
+}
+
+.inspector-fullscreen-righthead-main {
+  min-width: 0;
+  flex: 1;
+}
+
+.inspector-fullscreen-righthead .inspector-title {
+  margin: 0;
+}
+
+.inspector-fullscreen-righthead .inspector-name {
+  margin: 4px 0 0;
+}
+
+.inspector-atom-world {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+@media (max-width: 900px) {
+  .inspector-fullscreen-split {
+    flex-direction: column;
+  }
+
+  .inspector-fullscreen-atom {
+    flex: 0 0 45vh;
+    min-height: 200px;
+    border-right: none;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .inspector-fullscreen-info {
+    flex: 1 1 auto;
+    width: 100%;
+  }
+}
+
+@media (max-width: 720px) {
+  .app-canvas-wrap--inspector {
+    margin-right: 0;
+  }
+
+  .app-inspector {
+    position: relative;
+    top: auto;
+    right: auto;
+    bottom: auto;
+    z-index: auto;
+    width: auto;
+    max-height: 40vh;
+    border-left: none;
+    border-top: 1px solid var(--border);
+    overflow: auto;
+    box-shadow: none;
+  }
+}
