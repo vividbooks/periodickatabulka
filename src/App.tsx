@@ -66,6 +66,8 @@ export default function App() {
     canLeft: false,
     canRight: false,
   })
+  /** Mobil: legenda skrytá za tlačítkem; po otevření pod sebou. */
+  const [legendMenuOpen, setLegendMenuOpen] = useState(false)
   const [selectedZ, setSelectedZ] = useState<number | null>(null)
   const [inspectorFullscreen, setInspectorFullscreen] = useState(false)
   const [layoutMode, setLayoutMode] =
@@ -108,6 +110,13 @@ export default function App() {
 
   const handleSelectElement = useCallback((el: ChemicalElement | null) => {
     setSelectedZ(el?.z ?? null)
+    if (
+      el != null &&
+      typeof window !== 'undefined' &&
+      window.matchMedia('(max-width: 720px)').matches
+    ) {
+      setInspectorFullscreen(true)
+    }
   }, [])
 
   const handleExpandLayout = useCallback(() => {
@@ -235,6 +244,17 @@ export default function App() {
       // eslint-disable-next-line react-hooks/set-state-in-effect -- synchronizace odvozeného UI stavu
       setInspectorFullscreen(false)
     }
+  }, [selectedZ])
+
+  const isMobileViewport = viewportSize.w > 0 && viewportSize.w <= 720
+  const legendPanelOpen = !isMobileViewport || legendMenuOpen
+
+  useEffect(() => {
+    if (!isMobileViewport) setLegendMenuOpen(false)
+  }, [isMobileViewport])
+
+  useEffect(() => {
+    if (selectedZ != null) setLegendMenuOpen(false)
   }, [selectedZ])
 
   /**
@@ -507,6 +527,9 @@ export default function App() {
           className={[
             'app-inspector',
             inspectorFullscreen ? 'app-inspector--fullscreen' : '',
+            inspectorFullscreen && isMobileViewport
+              ? 'app-inspector--mobile-cover'
+              : '',
           ]
             .filter(Boolean)
             .join(' ')}
@@ -654,7 +677,49 @@ export default function App() {
               />
             </svg>
           </button>
+          <button
+            type="button"
+            className="app-legend-hamburger"
+            aria-expanded={legendMenuOpen}
+            aria-controls="app-legend-footer-panel"
+            id="app-legend-menu-toggle"
+            onClick={() => setLegendMenuOpen((o) => !o)}
+            aria-label={
+              legendMenuOpen
+                ? 'Skrýt skupiny prvků'
+                : 'Skupiny prvků — zobrazit'
+            }
+            title="Skupiny prvků"
+          >
+            <svg
+              className="app-legend-hamburger-icon"
+              viewBox="0 0 24 24"
+              width="22"
+              height="22"
+              aria-hidden
+            >
+              <path
+                d="M4 7h16M4 12h16M4 17h16"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+              />
+            </svg>
+          </button>
         </div>
+        <div
+          className={[
+            'app-legend-footer-panel',
+            legendPanelOpen ? 'app-legend-footer-panel--open' : '',
+          ]
+            .filter(Boolean)
+            .join(' ')}
+          id="app-legend-footer-panel"
+          role="region"
+          aria-labelledby="app-legend-menu-toggle"
+          hidden={!legendPanelOpen}
+        >
         <button
           type="button"
           className={[
@@ -730,6 +795,7 @@ export default function App() {
             />
           </svg>
         </button>
+        </div>
       </div>
     </div>
   )

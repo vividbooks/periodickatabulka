@@ -63,6 +63,12 @@ export function useInfiniteCanvas(
     pointerId: number
   } | null>(null)
 
+  /** Aktivní ukazatele ve viewportu (pro pinch zoom dvěma prsty). */
+  const pointersRef = useRef(
+    new Map<number, { x: number; y: number }>(),
+  )
+  const pinchRef = useRef<{ lastDist: number } | null>(null)
+
   useEffect(() => {
     const onKeyDown = (e: KeyboardEvent) => {
       if (e.code === 'Space' && !e.repeat) spaceDown.current = true
@@ -91,6 +97,21 @@ export function useInfiniteCanvas(
 
   const onPointerDownCapture = useCallback(
     (e: React.PointerEvent<HTMLElement>) => {
+      const vp = viewportRef.current
+      if (vp) {
+        const r = vp.getBoundingClientRect()
+        pointersRef.current.set(e.pointerId, {
+          x: e.clientX - r.left,
+          y: e.clientY - r.top,
+        })
+        if (pointersRef.current.size === 2) {
+          e.preventDefault()
+          probe.current = null
+          pan.current = null
+          pinchRef.current = null
+        }
+      }
+
       const right = e.button === 2
       const middle = e.button === 1
       const spacePan = e.button === 0 && spaceDown.current
@@ -108,7 +129,7 @@ export function useInfiniteCanvas(
         return
       }
 
-      if (e.button === 0) {
+      if (e.button === 0 && pointersRef.current.size === 1) {
         probe.current = {
           pointerId: e.pointerId,
           sx: e.clientX,
@@ -116,11 +137,39 @@ export function useInfiniteCanvas(
         }
       }
     },
-    [],
+    [viewportRef],
   )
 
   const onPointerMove = useCallback(
     (e: React.PointerEvent<HTMLElement>) => {
+      const vp = viewportRef.current
+      if (vp) {
+        const r = vp.getBoundingClientRect()
+        pointersRef.current.set(e.pointerId, {
+          x: e.clientX - r.left,
+          y: e.clientY - r.top,
+        })
+      }
+
+      if (pointersRef.current.size >= 2) {
+        const pts = [...pointersRef.current.values()].slice(0, 2)
+        const [a, b] = pts
+        const dist = Math.hypot(b.x - a.x, b.y - a.y)
+        const d = Math.max(dist, 1e-2)
+        const midX = (a.x + b.x) / 2
+        const midY = (a.y + b.y) / 2
+        if (pinchRef.current == null) {
+          pinchRef.current = { lastDist: d }
+          return
+        }
+        const ratio = d / pinchRef.current.lastDist
+        pinchRef.current.lastDist = d
+        if (Math.abs(ratio - 1) < 1e-5) return
+        const deltaY = -Math.log(ratio) / 0.0082
+        applyWheelZoom(midX, midY, deltaY)
+        return
+      }
+
       const active = pan.current
       if (active && e.pointerId === active.pointerId) {
         const dx = e.clientX - active.lx
@@ -157,11 +206,14 @@ export function useInfiniteCanvas(
       }
       probe.current = null
     },
-    [viewportRef],
+    [viewportRef, applyWheelZoom],
   )
 
   const onPointerUpLike = useCallback(
     (e: React.PointerEvent<HTMLElement>) => {
+      pointersRef.current.delete(e.pointerId)
+      if (pointersRef.current.size < 2) pinchRef.current = null
+
       const pr = probe.current
       if (pr && e.pointerId === pr.pointerId) probe.current = null
 
@@ -181,6 +233,8 @@ export function useInfiniteCanvas(
   const onLostPointerCapture = useCallback(() => {
     pan.current = null
     probe.current = null
+    pointersRef.current.clear()
+    pinchRef.current = null
   }, [])
 
   const setCamera = useCallback((next: Camera) => {

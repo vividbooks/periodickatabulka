@@ -41,6 +41,23 @@
   transition: padding-right 0.2s ease;
 }
 
+/* Hamburger se zobrazí jen na mobilu — vedle slideru v .app-zoom-control */
+.app-legend-hamburger {
+  display: none;
+}
+
+.app-legend-hamburger-icon {
+  display: block;
+}
+
+.app-legend-footer-panel {
+  display: flex;
+  flex: 1;
+  min-width: 0;
+  align-items: center;
+  gap: 4px;
+}
+
 .app-legend-footer {
   position: relative;
   z-index: 1;
@@ -572,6 +589,21 @@
   overflow: hidden;
 }
 
+/* Mobil: detail přes celou obrazovku — jen zavřít (bez přepínače zmenšit) */
+@media (max-width: 720px) {
+  .app-inspector--fullscreen.app-inspector--mobile-cover {
+    z-index: 500;
+    padding-top: max(12px, env(safe-area-inset-top));
+    padding-left: env(safe-area-inset-left);
+    padding-right: env(safe-area-inset-right);
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+
+  .app-inspector--fullscreen.app-inspector--mobile-cover .inspector-fs {
+    display: none;
+  }
+}
+
 .inspector-fullscreen-split {
   flex: 1;
   min-height: 0;
@@ -700,15 +732,62 @@
   }
 
   .inspector-fullscreen-atom {
-    flex: 0 0 45vh;
-    min-height: 200px;
+    flex: 0 0 34vh;
+    min-height: 160px;
     border-right: none;
     border-bottom: 1px solid var(--border);
   }
 
-  .inspector-fullscreen-info {
+  /* Přebije .inspector-fullscreen-split .inspector-fullscreen-info { width: 50% } — spodní panel na celou šířku */
+  .inspector-fullscreen-split .inspector-fullscreen-info {
     flex: 1 1 auto;
     width: 100%;
+    max-width: none;
+    min-width: 0;
+    align-self: stretch;
+  }
+}
+
+/* Užší mobil — ještě méně místa pro model atomu, víc pro text */
+@media (max-width: 720px) {
+  .inspector-fullscreen-atom {
+    flex: 0 0 min(26vh, 220px);
+    min-height: 120px;
+  }
+
+  .app-inspector--fullscreen .inspector-fullscreen-righthead {
+    position: relative;
+    padding-left: 56px;
+    margin-bottom: 12px;
+    align-items: flex-start;
+    justify-content: flex-start;
+    min-height: 52px;
+  }
+
+  .app-inspector--fullscreen .inspector-fullscreen-righthead .inspector-header-actions {
+    position: absolute;
+    left: 0;
+    top: 0;
+    z-index: 2;
+    margin: 0;
+  }
+
+  .app-inspector--fullscreen .inspector-close-x {
+    width: 48px;
+    height: 48px;
+    margin: 0;
+    font-size: 1.85rem;
+    font-weight: 300;
+    line-height: 1;
+    border-radius: 12px;
+    color: var(--text-primary);
+    background: rgb(255 255 255 / 0.1);
+    border: 1px solid rgb(255 255 255 / 0.22);
+    box-shadow: 0 2px 10px rgb(0 0 0 / 0.35);
+  }
+
+  .app-inspector--fullscreen .inspector-close-x:hover {
+    background: rgb(255 255 255 / 0.16);
   }
 }
 
@@ -752,6 +831,60 @@
     -webkit-overflow-scrolling: touch;
     box-shadow: none;
     padding-bottom: max(16px, env(safe-area-inset-bottom));
+  }
+
+  .app-legend-hamburger {
+    display: flex;
+    flex-shrink: 0;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    min-width: 44px;
+    height: 44px;
+    padding: 0;
+    margin: 0;
+    color: #e3f2ff;
+    background: rgb(8 14 40 / 0.95);
+    border: 2px solid rgb(68 138 255 / 0.45);
+    border-radius: 8px;
+    cursor: pointer;
+    box-shadow: inset 0 1px 0 0 rgb(255 255 255 / 0.06);
+  }
+
+  .app-legend-hamburger[aria-expanded='true'] {
+    border-color: rgb(107 159 255 / 0.75);
+    background: rgb(20 32 72 / 0.95);
+  }
+
+  .app-legend-hamburger:focus-visible {
+    outline: 2px solid var(--focus-ring);
+    outline-offset: 2px;
+  }
+
+  .app-legend-footer-panel:not(.app-legend-footer-panel--open) {
+    display: none !important;
+  }
+
+  .app-legend-footer-panel--open {
+    flex-direction: column;
+    align-items: stretch;
+    flex: 1 1 100%;
+    width: 100%;
+    gap: 8px;
+  }
+
+  .app-legend-footer-panel--open .app-legend-footer-scroll {
+    overflow-x: visible;
+    overflow-y: visible;
+    max-height: none;
+  }
+
+  .app-legend-footer-panel--open .app-legend-bar {
+    flex-direction: column;
+    align-items: stretch;
+    width: 100%;
+    max-width: none;
+    overflow-x: visible;
   }
 
   .app-legend-footer {
