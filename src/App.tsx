@@ -879,8 +879,10 @@ const ZsInspectorPanel = memo(function ZsInspectorPanel({
   const sidebarHeader = (
     <header className="inspector-header">
       <div className="inspector-header-main">
-        <h2 className="inspector-title">{element.symbol}</h2>
-        <p className="inspector-name">{element.nameCs}</p>
+        <div className="inspector-header-titles">
+          <h2 className="inspector-title">{element.symbol}</h2>
+          <p className="inspector-name">{element.nameCs}</p>
+        </div>
       </div>
       {headerActions}
     </header>
@@ -889,8 +891,10 @@ const ZsInspectorPanel = memo(function ZsInspectorPanel({
   const fullscreenRightHead = (
     <div className="inspector-fullscreen-righthead">
       <div className="inspector-fullscreen-righthead-main">
-        <h2 className="inspector-title">{element.symbol}</h2>
-        <p className="inspector-name">{element.nameCs}</p>
+        <div className="inspector-header-titles">
+          <h2 className="inspector-title">{element.symbol}</h2>
+          <p className="inspector-name">{element.nameCs}</p>
+        </div>
       </div>
       {headerActions}
     </div>

@@ -363,6 +363,13 @@ export const PERIODIC_TABLE_AXIS_COL_PX = PERIODIC_TABLE_CELL_PX
 export const PERIODIC_TABLE_AXIS_ROW_PX = PERIODIC_TABLE_CELL_PX
 
 /**
+ * Mezera mezi osami (čísla skupin/period) a mřížkou prvků.
+ * Musí odpovídat `PeriodicTable.css` → `--pt-axis-element-gutter`.
+ */
+export const PERIODIC_TABLE_AXIS_ELEMENT_GUTTER_PX =
+  PERIODIC_TABLE_CELL_PX + PERIODIC_TABLE_GAP_PX
+
+/**
  * Extra výška pod rozšířenou mřížkou (bobánek pod Ac).
  * Musí odpovídat `PeriodicTable.css` → `.periodic-table-grid-wrap--expanded { padding-bottom }`.
  */
@@ -380,8 +387,8 @@ export function periodicTableOuterSizeForGrid(
   const rowGap = gap + underShift
   const axisCol = PERIODIC_TABLE_AXIS_COL_PX
   const axisRow = PERIODIC_TABLE_AXIS_ROW_PX
-  /* mezera mezi osami a dlaždicemi */
-  const axisG = gap
+  /* mezera mezi osami a dlaždicemi (jedna „prázdná“ buňka + gap) */
+  const axisG = PERIODIC_TABLE_AXIS_ELEMENT_GUTTER_PX
   const width =
     pad * 2 +
     axisCol +
@@ -430,8 +437,8 @@ export function elementCellRectInPeriodicTableRootPx(
   const axis = PERIODIC_TABLE_AXIS_COL_PX
   const pad = gap
   const rowGap = gap + cell * 0.05
-  const gridCoreLeft = pad + axis + gap
-  const gridCoreTop = pad + PERIODIC_TABLE_AXIS_ROW_PX + gap
+  const gridCoreLeft = pad + axis + PERIODIC_TABLE_AXIS_ELEMENT_GUTTER_PX
+  const gridCoreTop = pad + PERIODIC_TABLE_AXIS_ROW_PX + PERIODIC_TABLE_AXIS_ELEMENT_GUTTER_PX
   const colStep = cell + gap
   const rowStep = cell + rowGap
   return {

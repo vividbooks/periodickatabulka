@@ -52,8 +52,14 @@
   /* Jedna dlaždice jako u prvků — navázání na mřížku (viz elements.ts) */
   --pt-axis-col: var(--pt-cell);
   --pt-axis-row: var(--pt-cell);
+  /* Jedna prázdná stopa mezi čísly os a dlaždicemi prvků (viz elements.ts PERIODIC_TABLE_AXIS_ELEMENT_GUTTER_PX) */
+  --pt-axis-element-gutter: calc(var(--pt-cell) + var(--pt-gap));
   --pt-axis-face: #152054;
   --pt-radius: calc(16px * 1.4);
+  /* Při zoomu (LOD≥1): značka i Z vlevo o 20 % menší — méně překryvu */
+  --pt-tile-zoom-factor: 1;
+  /* Posun atomového čísla dolů od středu symbolu; bez latiny (LOD 1–3) víc */
+  --pt-znum-extra-down: calc(var(--pt-cell) * 0.148);
   padding: 0;
   user-select: none;
   background: transparent;
@@ -61,6 +67,10 @@
   display: inline-flex;
   flex-direction: column;
   align-items: stretch;
+}
+
+.periodic-table-root:not([data-pt-lod='0']) {
+  --pt-tile-zoom-factor: 0.8;
 }
 
 /* Tmavý panel jen kolem mřížky; popisek osy je mimo (bez druhé lišty u spodní legendy). */
@@ -94,25 +104,26 @@
 /*
  * Osa skupin (1–18 / 1–32) a period (1–7; u kompaktu znovu 6 a 7 u f-řádků).
  */
+/* Horní řádek = jen popisky skupin (bez prázdné rohové dlaždice); odsazení = šířka osy period + mezera k prvkům */
 .pt-axis-frame {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: var(--pt-axis-element-gutter);
+}
+
+.pt-axis-top-row {
+  padding-left: calc(var(--pt-axis-col) + var(--pt-axis-element-gutter));
+  box-sizing: border-box;
+}
+
+.pt-axis-bottom-row {
   display: grid;
-  grid-template-columns: var(--pt-axis-col) var(--pt-gap) max-content;
-  grid-template-rows: var(--pt-axis-row) var(--pt-gap) max-content;
+  grid-template-columns: var(--pt-axis-col) var(--pt-axis-element-gutter) max-content;
   align-items: start;
 }
 
-.pt-axis-corner {
-  grid-column: 1;
-  grid-row: 1;
-  place-self: stretch;
-  display: flex;
-  align-items: stretch;
-  justify-content: stretch;
-}
-
 .pt-col-labels {
-  grid-column: 3;
-  grid-row: 1;
   display: grid;
   column-gap: var(--pt-gap);
   align-self: stretch;
@@ -121,7 +132,6 @@
 
 .pt-row-labels {
   grid-column: 1;
-  grid-row: 3;
   display: grid;
   justify-items: stretch;
   align-items: stretch;
@@ -150,10 +160,6 @@
   z-index: 1;
 }
 
-.pt-axis-tile--corner .pt-axis-tile__face {
-  pointer-events: none;
-}
-
 .pt-axis-tile--col,
 .pt-axis-tile--row {
   cursor: help;
@@ -173,6 +179,7 @@
 
 .pt-axis-num {
   font-family:
+    'Fenomen Sans',
     system-ui,
     -apple-system,
     sans-serif;
@@ -202,7 +209,6 @@
  */
 .pt-grid-core {
   grid-column: 3;
-  grid-row: 3;
   position: relative;
   z-index: 10;
   display: inline-block;
@@ -296,6 +302,12 @@
   display: none;
 }
 
+.periodic-table-root[data-pt-lod='1'],
+.periodic-table-root[data-pt-lod='2'],
+.periodic-table-root[data-pt-lod='3'] {
+  --pt-znum-extra-down: calc(var(--pt-cell) * 0.195);
+}
+
 /* Značky stavu / radioaktivity / umělé — až při dostředivém zoomu (jako χ a latina) */
 .periodic-table-root:not([data-pt-lod='4']) .pt-tile-marker {
   display: none;
@@ -318,6 +330,10 @@
 
 .periodic-table-root[data-pt-dim-others] .pt-cell-slot--selected .pt-tile-marker {
   display: flex;
+}
+
+.periodic-table-root[data-pt-dim-others] .pt-cell-slot--selected {
+  --pt-znum-extra-down: calc(var(--pt-cell) * 0.148);
 }
 
 .periodic-table-grid-wrap {
@@ -910,8 +926,11 @@
 .pt-znum-stack {
   position: absolute;
   left: 11px;
+  /* Střed symbolu (−5 % buňky) + --pt-znum-extra-down (víc bez latiny u LOD 1–3) */
   top: 50%;
-  transform: translateY(calc(-50% + var(--pt-cell) * 0.2));
+  transform: translateY(
+    calc(-50% - var(--pt-cell) * 0.05 + var(--pt-znum-extra-down))
+  );
   display: flex;
   flex-direction: column;
   align-items: flex-start;
@@ -933,12 +952,24 @@
   flex-shrink: 0;
 }
 
+/* „Umělé“ — spodní levý roh dlaždice (ne pod Z) */
+.pt-tile-marker--umele-corner {
+  top: auto;
+  right: auto;
+  left: calc(4px + var(--pt-cell) * 0.02);
+  bottom: calc(2px + var(--pt-cell) * 0.025);
+  width: calc(var(--pt-cell) * 0.18);
+  height: calc(var(--pt-cell) * 0.18);
+}
+
 .pt-znum {
   position: absolute;
   left: 11px;
   top: 50%;
-  transform: translateY(calc(-50% + var(--pt-cell) * 0.2));
-  font-size: calc(17px * 1.3);
+  transform: translateY(
+    calc(-50% - var(--pt-cell) * 0.05 + var(--pt-znum-extra-down))
+  );
+  font-size: calc(17px * 1.3 * var(--pt-tile-zoom-factor));
   font-weight: 700;
   line-height: 1;
   letter-spacing: -0.03em;
@@ -950,8 +981,8 @@
   top: 50%;
   /* +5 % pod střed, pak o 10 % výšky buňky nahoru ⇒ −5 % od středu */
   transform: translate(-50%, calc(-50% - var(--pt-cell) * 0.05));
-  /* … × 1,3 (+30 % značka) */
-  font-size: calc(32px * 1.3 * 1.2 * 1.2 * 1.3);
+  /* … × 1,3 (+30 % značka); × --pt-tile-zoom-factor při LOD≥1 (−20 %) */
+  font-size: calc(32px * 1.3 * 1.2 * 1.2 * 1.3 * var(--pt-tile-zoom-factor));
   font-family:
     'Fenomen Sans Symbol',
     'Fenomen Sans',

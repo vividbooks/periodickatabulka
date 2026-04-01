@@ -473,15 +473,27 @@ function PeriodicTableInner({
               </span>
               <div className="pt-symbol-block">
                 {tileMarkers.bottomLeft ? (
-                  <div className="pt-znum-stack">
-                    <span className="pt-znum">{el.z}</span>
-                    <span
-                      className="pt-tile-marker pt-tile-marker--under-z"
-                      title={PT_MARKER_TITLES[tileMarkers.bottomLeft]}
-                    >
-                      <PtMarkerSvg kind={tileMarkers.bottomLeft} />
-                    </span>
-                  </div>
+                  tileMarkers.bottomLeft === 'umele' ? (
+                    <>
+                      <span className="pt-znum">{el.z}</span>
+                      <span
+                        className="pt-tile-marker pt-tile-marker--umele-corner"
+                        title={PT_MARKER_TITLES.umele}
+                      >
+                        <PtMarkerSvg kind="umele" />
+                      </span>
+                    </>
+                  ) : (
+                    <div className="pt-znum-stack">
+                      <span className="pt-znum">{el.z}</span>
+                      <span
+                        className="pt-tile-marker pt-tile-marker--under-z"
+                        title={PT_MARKER_TITLES[tileMarkers.bottomLeft]}
+                      >
+                        <PtMarkerSvg kind={tileMarkers.bottomLeft} />
+                      </span>
+                    </div>
+                  )
                 ) : (
                   <span className="pt-znum">{el.z}</span>
                 )}
@@ -567,91 +579,32 @@ function PeriodicTableInner({
             .join(' ')}
         >
           <div className="pt-axis-frame">
-            <div className="pt-axis-corner" aria-hidden>
+            <div className="pt-axis-top-row">
               <div
-                className={[
-                  'pt-axis-tile',
-                  'pt-axis-tile--corner',
-                  effectiveAxisHover != null ? 'pt-axis-tile--dim' : '',
-                ]
-                  .filter(Boolean)
-                  .join(' ')}
+                className="pt-col-labels"
+                style={{
+                  gridTemplateColumns: `repeat(${gridCols}, var(--pt-cell))`,
+                }}
+                onPointerLeave={(e) => {
+                  const next = e.relatedTarget as Node | null
+                  if (next && e.currentTarget.contains(next)) return
+                  setAxisHover((h) => (h?.kind === 'col' ? null : h))
+                }}
               >
-                <div className="pt-axis-tile__face" />
-              </div>
-            </div>
-            <div
-              className="pt-col-labels"
-              style={{
-                gridTemplateColumns: `repeat(${gridCols}, var(--pt-cell))`,
-              }}
-              onPointerLeave={(e) => {
-                const next = e.relatedTarget as Node | null
-                if (next && e.currentTarget.contains(next)) return
-                setAxisHover((h) => (h?.kind === 'col' ? null : h))
-              }}
-            >
-              {colHeads.map(({ gridCol, label }) => (
-                <div
-                  key={gridCol}
-                  className={[
-                    'pt-axis-tile',
-                    'pt-axis-tile--col',
-                    effectiveAxisHover?.kind === 'col' &&
-                    effectiveAxisHover.index === gridCol
-                      ? 'pt-axis-tile--band'
-                      : '',
-                    effectiveAxisHover != null &&
-                    !(
-                      effectiveAxisHover.kind === 'col' &&
-                      effectiveAxisHover.index === gridCol
-                    )
-                      ? 'pt-axis-tile--dim'
-                      : '',
-                  ]
-                    .filter(Boolean)
-                    .join(' ')}
-                  onPointerEnter={() => {
-                    if (selectedZ != null) return
-                    setAxisHover({ kind: 'col', index: gridCol })
-                  }}
-                >
-                  <div className="pt-axis-tile__face">
-                    {label != null ? (
-                      <span className="pt-axis-num pt-axis-num--col">{label}</span>
-                    ) : null}
-                  </div>
-                </div>
-              ))}
-            </div>
-          <div
-            className="pt-row-labels"
-            style={{
-              gridTemplateRows: `repeat(${gridRows}, var(--pt-cell))`,
-              rowGap: 'calc(var(--pt-gap) + var(--pt-under-shift))',
-            }}
-            onPointerLeave={(e) => {
-              const next = e.relatedTarget as Node | null
-              if (next && e.currentTarget.contains(next)) return
-              setAxisHover((h) => (h?.kind === 'row' ? null : h))
-            }}
-            >
-              {rowHeads.map((label, i) => {
-                const gridRow = i + 1
-                return (
+                {colHeads.map(({ gridCol, label }) => (
                   <div
-                    key={`r-${i}-${label}`}
+                    key={gridCol}
                     className={[
                       'pt-axis-tile',
-                      'pt-axis-tile--row',
-                      effectiveAxisHover?.kind === 'row' &&
-                      effectiveAxisHover.index === gridRow
+                      'pt-axis-tile--col',
+                      effectiveAxisHover?.kind === 'col' &&
+                      effectiveAxisHover.index === gridCol
                         ? 'pt-axis-tile--band'
                         : '',
                       effectiveAxisHover != null &&
                       !(
-                        effectiveAxisHover.kind === 'row' &&
-                        effectiveAxisHover.index === gridRow
+                        effectiveAxisHover.kind === 'col' &&
+                        effectiveAxisHover.index === gridCol
                       )
                         ? 'pt-axis-tile--dim'
                         : '',
@@ -660,140 +613,190 @@ function PeriodicTableInner({
                       .join(' ')}
                     onPointerEnter={() => {
                       if (selectedZ != null) return
-                      setAxisHover({ kind: 'row', index: gridRow })
+                      setAxisHover({ kind: 'col', index: gridCol })
                     }}
                   >
                     <div className="pt-axis-tile__face">
-                      <span className="pt-axis-num pt-axis-num--row">{label}</span>
+                      {label != null ? (
+                        <span className="pt-axis-num pt-axis-num--col">{label}</span>
+                      ) : null}
                     </div>
                   </div>
-                )
-              })}
+                ))}
+              </div>
             </div>
-            <div className="pt-grid-core">
-              <p className="pt-table-title">
-                <span className="pt-table-title__line">Periodická</span>
-                <span className="pt-table-title__line">tabulka prvků</span>
-              </p>
-              {layoutMode === 'compact' ? (
-                <FBlockCompactOverlays onExpand={onExpandLayout} />
-              ) : (
-                <FBlockExpandedCompactNub onCompact={onCompactLayout} />
-              )}
-              <div className="pt-grid-and-nav">
-                <div
-                  className="periodic-table-grid"
-                  style={{
-                    gridTemplateColumns: `repeat(${gridCols}, var(--pt-cell))`,
-                    gridTemplateRows: `repeat(${gridRows}, var(--pt-cell))`,
-                  }}
-                >
-                  {cells}
-                </div>
-                {selectedZ != null &&
-                !inspectorFullscreen &&
-                navCenter != null ? (
-                  <nav
-                    className="pt-element-nav-arrows"
-                    style={navLayerStyle}
-                    aria-label="Sousední prvek v tabulce"
+            <div className="pt-axis-bottom-row">
+              <div
+                className="pt-row-labels"
+                style={{
+                  gridTemplateRows: `repeat(${gridRows}, var(--pt-cell))`,
+                  rowGap: 'calc(var(--pt-gap) + var(--pt-under-shift))',
+                }}
+                onPointerLeave={(e) => {
+                  const next = e.relatedTarget as Node | null
+                  if (next && e.currentTarget.contains(next)) return
+                  setAxisHover((h) => (h?.kind === 'row' ? null : h))
+                }}
+              >
+                {rowHeads.map((label, i) => {
+                  const gridRow = i + 1
+                  return (
+                    <div
+                      key={`r-${i}-${label}`}
+                      className={[
+                        'pt-axis-tile',
+                        'pt-axis-tile--row',
+                        effectiveAxisHover?.kind === 'row' &&
+                        effectiveAxisHover.index === gridRow
+                          ? 'pt-axis-tile--band'
+                          : '',
+                        effectiveAxisHover != null &&
+                        !(
+                          effectiveAxisHover.kind === 'row' &&
+                          effectiveAxisHover.index === gridRow
+                        )
+                          ? 'pt-axis-tile--dim'
+                          : '',
+                      ]
+                        .filter(Boolean)
+                        .join(' ')}
+                      onPointerEnter={() => {
+                        if (selectedZ != null) return
+                        setAxisHover({ kind: 'row', index: gridRow })
+                      }}
+                    >
+                      <div className="pt-axis-tile__face">
+                        <span className="pt-axis-num pt-axis-num--row">{label}</span>
+                      </div>
+                    </div>
+                  )
+                })}
+              </div>
+              <div className="pt-grid-core">
+                <p className="pt-table-title">
+                  <span className="pt-table-title__line">Periodická</span>
+                  <span className="pt-table-title__line">tabulka prvků</span>
+                </p>
+                {layoutMode === 'compact' ? (
+                  <FBlockCompactOverlays onExpand={onExpandLayout} />
+                ) : (
+                  <FBlockExpandedCompactNub onCompact={onCompactLayout} />
+                )}
+                <div className="pt-grid-and-nav">
+                  <div
+                    className="periodic-table-grid"
+                    style={{
+                      gridTemplateColumns: `repeat(${gridCols}, var(--pt-cell))`,
+                      gridTemplateRows: `repeat(${gridRows}, var(--pt-cell))`,
+                    }}
                   >
-                    <button
-                      type="button"
-                      className="pt-element-nav-arrow pt-element-nav-arrow--up"
-                      disabled={navNeighbors.up == null}
-                      onClick={() => onNavigate('up')}
-                      aria-label="Vybrat prvek o řádek výš"
-                      title="Řádek nahoru (↑)"
+                    {cells}
+                  </div>
+                  {selectedZ != null &&
+                  !inspectorFullscreen &&
+                  navCenter != null ? (
+                    <nav
+                      className="pt-element-nav-arrows"
+                      style={navLayerStyle}
+                      aria-label="Sousední prvek v tabulce"
                     >
-                      <svg
-                        className="pt-element-nav-arrow-icon"
-                        viewBox="0 0 24 24"
-                        aria-hidden
+                      <button
+                        type="button"
+                        className="pt-element-nav-arrow pt-element-nav-arrow--up"
+                        disabled={navNeighbors.up == null}
+                        onClick={() => onNavigate('up')}
+                        aria-label="Vybrat prvek o řádek výš"
+                        title="Řádek nahoru (↑)"
                       >
-                        <path
-                          fill="none"
-                          stroke="currentColor"
-                          strokeWidth="2.5"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          d="M10 7l5 5-5 5"
-                          transform="rotate(-90 12 12)"
-                        />
-                      </svg>
-                    </button>
-                    <button
-                      type="button"
-                      className="pt-element-nav-arrow pt-element-nav-arrow--down"
-                      disabled={navNeighbors.down == null}
-                      onClick={() => onNavigate('down')}
-                      aria-label="Vybrat prvek o řádek níž"
-                      title="Řádek dolů (↓)"
-                    >
-                      <svg
-                        className="pt-element-nav-arrow-icon"
-                        viewBox="0 0 24 24"
-                        aria-hidden
+                        <svg
+                          className="pt-element-nav-arrow-icon"
+                          viewBox="0 0 24 24"
+                          aria-hidden
+                        >
+                          <path
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth="2.5"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            d="M10 7l5 5-5 5"
+                            transform="rotate(-90 12 12)"
+                          />
+                        </svg>
+                      </button>
+                      <button
+                        type="button"
+                        className="pt-element-nav-arrow pt-element-nav-arrow--down"
+                        disabled={navNeighbors.down == null}
+                        onClick={() => onNavigate('down')}
+                        aria-label="Vybrat prvek o řádek níž"
+                        title="Řádek dolů (↓)"
                       >
-                        <path
-                          fill="none"
-                          stroke="currentColor"
-                          strokeWidth="2.5"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          d="M10 7l5 5-5 5"
-                          transform="rotate(90 12 12)"
-                        />
-                      </svg>
-                    </button>
-                    <button
-                      type="button"
-                      className="pt-element-nav-arrow pt-element-nav-arrow--left"
-                      disabled={navNeighbors.left == null}
-                      onClick={() => onNavigate('left')}
-                      aria-label="Vybrat prvek vlevo"
-                      title="Sloupec vlevo (←)"
-                    >
-                      <svg
-                        className="pt-element-nav-arrow-icon"
-                        viewBox="0 0 24 24"
-                        aria-hidden
+                        <svg
+                          className="pt-element-nav-arrow-icon"
+                          viewBox="0 0 24 24"
+                          aria-hidden
+                        >
+                          <path
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth="2.5"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            d="M10 7l5 5-5 5"
+                            transform="rotate(90 12 12)"
+                          />
+                        </svg>
+                      </button>
+                      <button
+                        type="button"
+                        className="pt-element-nav-arrow pt-element-nav-arrow--left"
+                        disabled={navNeighbors.left == null}
+                        onClick={() => onNavigate('left')}
+                        aria-label="Vybrat prvek vlevo"
+                        title="Sloupec vlevo (←)"
                       >
-                        <path
-                          fill="none"
-                          stroke="currentColor"
-                          strokeWidth="2.5"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          d="M14 7l-5 5 5 5"
-                        />
-                      </svg>
-                    </button>
-                    <button
-                      type="button"
-                      className="pt-element-nav-arrow pt-element-nav-arrow--right"
-                      disabled={navNeighbors.right == null}
-                      onClick={() => onNavigate('right')}
-                      aria-label="Vybrat prvek vpravo"
-                      title="Sloupec vpravo (→)"
-                    >
-                      <svg
-                        className="pt-element-nav-arrow-icon"
-                        viewBox="0 0 24 24"
-                        aria-hidden
+                        <svg
+                          className="pt-element-nav-arrow-icon"
+                          viewBox="0 0 24 24"
+                          aria-hidden
+                        >
+                          <path
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth="2.5"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            d="M14 7l-5 5 5 5"
+                          />
+                        </svg>
+                      </button>
+                      <button
+                        type="button"
+                        className="pt-element-nav-arrow pt-element-nav-arrow--right"
+                        disabled={navNeighbors.right == null}
+                        onClick={() => onNavigate('right')}
+                        aria-label="Vybrat prvek vpravo"
+                        title="Sloupec vpravo (→)"
                       >
-                        <path
-                          fill="none"
-                          stroke="currentColor"
-                          strokeWidth="2.5"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          d="M10 7l5 5-5 5"
-                        />
-                      </svg>
-                    </button>
-                  </nav>
-                ) : null}
+                        <svg
+                          className="pt-element-nav-arrow-icon"
+                          viewBox="0 0 24 24"
+                          aria-hidden
+                        >
+                          <path
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth="2.5"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            d="M10 7l5 5-5 5"
+                          />
+                        </svg>
+                      </button>
+                    </nav>
+                  ) : null}
+                </div>
               </div>
             </div>
           </div>

@@ -1,6 +1,10 @@
 import type { ChemicalElement, ElementCategory } from './elements'
 
-/** Barvy Bohrova modelu — odpovídají paletě dlaždic (PeriodicTable.css), bez gradientů. */
+/**
+ * Barvy Bohrova modelu: z tabulky jen „slupka“ jádra (velký kruh).
+ * Elektrony, dráhy a částice v jádře jsou u všech prvků stejné — jinak by to vypadalo,
+ * že se mění „druh“ elektronů podle prvku.
+ */
 export type AtomModelPalette = {
   nucleusFill: string
   nucleusStroke: string
@@ -13,14 +17,22 @@ export type AtomModelPalette = {
   orbitStroke: string
 }
 
-/** ~ color-mix(in srgb, #fbee7b 70%, white 30%) */
+/** ~ color-mix(in srgb, #fbee7b 70%, white 30%) — tvář kovů v tabulce */
 const KOV_FACE = '#fcf3a3'
 const KOV_RIM_TOP = '#f6af34'
-const KOV_SKY = '#c9b358'
 
 const NEKOV_FACE = '#5e9fff'
 const NEKOV_RIM_TOP = '#8ec6ff'
-const NEKOV_RIM_BOT = '#244f9a'
+
+/** Jednotné elektrony a oběžné dráhy (dříve modrý gradient → plochá výplň). */
+const ELECTRON_FILL = '#8ec6ff'
+const ELECTRON_STROKE = '#1565c0'
+const ORBIT_STROKE = '#64748b'
+
+const PROTON_FILL = '#ff1744'
+const PROTON_STROKE = '#b71c1c'
+const NEUTRON_FILL = '#b0bec5'
+const NEUTRON_STROKE = '#546e7a'
 
 function isCnopsNonmetal(z: number, cat: ElementCategory): boolean {
   return cat === 'nonmetal' && [6, 7, 8, 15, 16].includes(z)
@@ -30,27 +42,38 @@ function isCol2CaSrBaRa(z: number, col: number): boolean {
   return col === 2 && [20, 38, 56, 88].includes(z)
 }
 
+function sameParticlesEverywhere(): Pick<
+  AtomModelPalette,
+  | 'protonFill'
+  | 'protonStroke'
+  | 'neutronFill'
+  | 'neutronStroke'
+  | 'electronFill'
+  | 'electronStroke'
+  | 'orbitStroke'
+> {
+  return {
+    protonFill: PROTON_FILL,
+    protonStroke: PROTON_STROKE,
+    neutronFill: NEUTRON_FILL,
+    neutronStroke: NEUTRON_STROKE,
+    electronFill: ELECTRON_FILL,
+    electronStroke: ELECTRON_STROKE,
+    orbitStroke: ORBIT_STROKE,
+  }
+}
+
 /**
- * Paleta pro Atom2D — sladěná s odstíny dlaždic / legendy v PeriodicTable.css.
+ * Paleta jádra podle dlaždice prvku (PeriodicTable.css); zbytek modelu je všude stejný.
  */
 export function atomModelPaletteForElement(el: ChemicalElement): AtomModelPalette {
   const { z, category, col } = el
-
-  const neut = {
-    neutronFill: '#b0bec5',
-    neutronStroke: '#546e7a',
-  } as const
 
   if (z === 85) {
     return {
       nucleusFill: '#f03b50',
       nucleusStroke: '#ffffff',
-      protonFill: '#ff1744',
-      protonStroke: '#b71c1c',
-      ...neut,
-      electronFill: '#ffffff',
-      electronStroke: '#fce4ec',
-      orbitStroke: '#f48fb1',
+      ...sameParticlesEverywhere(),
     }
   }
 
@@ -58,12 +81,7 @@ export function atomModelPaletteForElement(el: ChemicalElement): AtomModelPalett
     return {
       nucleusFill: '#f03b50',
       nucleusStroke: '#ffcdd2',
-      protonFill: '#ff1744',
-      protonStroke: '#b71c1c',
-      ...neut,
-      electronFill: '#ffcdd2',
-      electronStroke: '#c62828',
-      orbitStroke: '#e57373',
+      ...sameParticlesEverywhere(),
     }
   }
 
@@ -71,12 +89,7 @@ export function atomModelPaletteForElement(el: ChemicalElement): AtomModelPalett
     return {
       nucleusFill: '#126cb0',
       nucleusStroke: '#42a5f5',
-      protonFill: '#ff1744',
-      protonStroke: '#b71c1c',
-      ...neut,
-      electronFill: '#8ec6ff',
-      electronStroke: '#1976d2',
-      orbitStroke: '#5e9fff',
+      ...sameParticlesEverywhere(),
     }
   }
 
@@ -84,12 +97,7 @@ export function atomModelPaletteForElement(el: ChemicalElement): AtomModelPalett
     return {
       nucleusFill: '#f8485e',
       nucleusStroke: '#ff6f82',
-      protonFill: '#ff1744',
-      protonStroke: '#b71c1c',
-      ...neut,
-      electronFill: '#ff8a9a',
-      electronStroke: '#c62828',
-      orbitStroke: '#e57373',
+      ...sameParticlesEverywhere(),
     }
   }
 
@@ -97,12 +105,7 @@ export function atomModelPaletteForElement(el: ChemicalElement): AtomModelPalett
     return {
       nucleusFill: NEKOV_FACE,
       nucleusStroke: '#ffcf6a',
-      protonFill: '#ff1744',
-      protonStroke: '#b71c1c',
-      ...neut,
-      electronFill: '#ffcf6a',
-      electronStroke: '#ffa726',
-      orbitStroke: '#ffb74d',
+      ...sameParticlesEverywhere(),
     }
   }
 
@@ -110,12 +113,7 @@ export function atomModelPaletteForElement(el: ChemicalElement): AtomModelPalett
     return {
       nucleusFill: NEKOV_FACE,
       nucleusStroke: '#ffffff',
-      protonFill: '#ff1744',
-      protonStroke: '#b71c1c',
-      ...neut,
-      electronFill: '#e3f2fd',
-      electronStroke: NEKOV_RIM_BOT,
-      orbitStroke: '#42a5f5',
+      ...sameParticlesEverywhere(),
     }
   }
 
@@ -123,12 +121,7 @@ export function atomModelPaletteForElement(el: ChemicalElement): AtomModelPalett
     return {
       nucleusFill: NEKOV_FACE,
       nucleusStroke: NEKOV_RIM_TOP,
-      protonFill: '#ff1744',
-      protonStroke: '#b71c1c',
-      ...neut,
-      electronFill: NEKOV_RIM_TOP,
-      electronStroke: NEKOV_RIM_BOT,
-      orbitStroke: '#42a5f5',
+      ...sameParticlesEverywhere(),
     }
   }
 
@@ -136,12 +129,7 @@ export function atomModelPaletteForElement(el: ChemicalElement): AtomModelPalett
     return {
       nucleusFill: '#0d8d5e',
       nucleusStroke: '#5fffbe',
-      protonFill: '#ff1744',
-      protonStroke: '#b71c1c',
-      ...neut,
-      electronFill: '#5fffbe',
-      electronStroke: '#0a5c40',
-      orbitStroke: '#4db6ac',
+      ...sameParticlesEverywhere(),
     }
   }
 
@@ -149,24 +137,13 @@ export function atomModelPaletteForElement(el: ChemicalElement): AtomModelPalett
     return {
       nucleusFill: '#a855e8',
       nucleusStroke: '#dd80ff',
-      protonFill: '#ff1744',
-      protonStroke: '#b71c1c',
-      ...neut,
-      electronFill: '#dd80ff',
-      electronStroke: '#7b1fa2',
-      orbitStroke: '#ce93d8',
+      ...sameParticlesEverywhere(),
     }
   }
 
-  /* Kovy: alkali, alkaline-earth, transition, post-transition — žlutá tvář jako .pt-fill-kov */
   return {
     nucleusFill: KOV_FACE,
     nucleusStroke: KOV_RIM_TOP,
-    protonFill: '#ff1744',
-    protonStroke: '#b71c1c',
-    ...neut,
-    electronFill: KOV_RIM_TOP,
-    electronStroke: '#d4a017',
-    orbitStroke: KOV_SKY,
+    ...sameParticlesEverywhere(),
   }
 }
