@@ -115,6 +115,49 @@
   box-shadow: inset 0 0 0 1px rgb(13 141 94 / 0.25);
 }
 
+/* Bloky: s = červená, p = modrá, d = zlatá, f = zelená (konzistentně s dlaždicemi) */
+.app-legend-btn--block-s {
+  background: #ef5350;
+  color: #1a0505;
+  border-color: #b71c1c;
+}
+
+.app-legend-btn--block-p {
+  background: #42a5f5;
+  color: #ffffff;
+  border-color: #0d47a1;
+}
+
+.app-legend-btn--block-d {
+  background: #ffca28;
+  color: #3e2723;
+  border-color: #e65100;
+}
+
+.app-legend-btn--block-f {
+  background: #66bb6a;
+  color: #0d1f0d;
+  border-color: #1b5e20;
+}
+
+.app-legend-btn--state-solid {
+  background: #1e2836;
+  color: #eceff1;
+  border-color: #78909c;
+}
+
+.app-legend-btn--state-liquid {
+  background: #0d3d5c;
+  color: #b3e5fc;
+  border-color: #29b6f6;
+}
+
+.app-legend-btn--state-gas {
+  background: #3e2723;
+  color: #ffccbc;
+  border-color: #ff7043;
+}
+
 .app-legend-btn--actinide {
   background: #140818;
   color: #e8b8ff;

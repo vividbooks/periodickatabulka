@@ -14,18 +14,18 @@ import {
 import { Atom2DModel } from './components/Atom2DModel'
 import { VividbooksPanel } from './components/VividbooksPanel'
 import { WikipediaImagesPanel } from './components/WikipediaImagesPanel'
-import { CategoryLegendBar } from './components/CategoryLegendBar'
 import { InfiniteCanvas } from './components/InfiniteCanvas'
 import { PeriodicTable } from './components/PeriodicTable'
+import { PropertyExplorePanel } from './components/PropertyExplorePanel'
 import {
   ELEMENTS,
   neighborElementInDirection,
+  periodicTableGridRectInRootPx,
   periodicTableOuterSizePxForLayout,
   type ChemicalElement,
   type GridNavDirection,
   type PeriodicTableLayoutMode,
 } from './data/elements'
-import type { LegendCategoryKey } from './data/legendCategories'
 import { SHELL_ELECTRONS_BY_ATOMIC_NUMBER } from './data/shellsFromPeriodicTableJson'
 import {
   formatShellsKlm,
@@ -33,6 +33,10 @@ import {
   zsValencePopis,
 } from './data/zsChemNarativ'
 import { vividbooksKnowledgeIdsForElement } from './data/vividbooksLessonsForElement'
+import {
+  DEFAULT_EXPLORE_PROPERTY_STATE,
+  type ExplorePropertyState,
+} from './data/exploreProperty'
 import { ZS_ELEMENT_CORE } from './data/zsElementCore'
 import { useWikipediaImagesForElement } from './hooks/useWikipediaImagesForElement'
 import { useAtomStageViewport } from './hooks/useAtomStageViewport'
@@ -60,25 +64,13 @@ type AtomCanvasPointerHandlers = Pick<
 export default function App() {
   const viewportRef = useRef<HTMLDivElement>(null)
   const atomStageRef = useRef<HTMLDivElement>(null)
-  const legendFooterScrollRef = useRef<HTMLDivElement>(null)
-  const [legendFooterScroll, setLegendFooterScroll] = useState({
-    overflow: false,
-    canLeft: false,
-    canRight: false,
-  })
-  /** Mobil: legenda skrytá za tlačítkem; po otevření pod sebou. */
-  const [legendMenuOpen, setLegendMenuOpen] = useState(false)
   const [selectedZ, setSelectedZ] = useState<number | null>(null)
   const [inspectorFullscreen, setInspectorFullscreen] = useState(false)
   const [layoutMode, setLayoutMode] =
     useState<PeriodicTableLayoutMode>('compact')
-  const [legendClicked, setLegendClicked] = useState<LegendCategoryKey | null>(
-    null,
+  const [exploreProperty, setExploreProperty] = useState<ExplorePropertyState>(
+    DEFAULT_EXPLORE_PROPERTY_STATE,
   )
-  const [legendHovered, setLegendHovered] = useState<LegendCategoryKey | null>(
-    null,
-  )
-  const legendHighlight = legendHovered ?? legendClicked
 
   const {
     camera,
@@ -127,14 +119,6 @@ export default function App() {
     setLayoutMode('compact')
   }, [])
 
-  const handleLegendHover = useCallback((key: LegendCategoryKey | null) => {
-    setLegendHovered(key)
-  }, [])
-
-  const handleLegendToggle = useCallback((key: LegendCategoryKey) => {
-    setLegendClicked((current) => (current === key ? null : key))
-  }, [])
-
   const handleCanvasPointerDownCapture = useCallback(
     (e: PointerEvent<HTMLDivElement>) => {
       canvasPointerDownCapture(e)
@@ -143,9 +127,8 @@ export default function App() {
       if (t.closest('.pt-fblock-expand-nub')) return
       if (t.closest('.pt-element-nav-arrows')) return
       if (selectedZ != null) setSelectedZ(null)
-      if (legendClicked != null) setLegendClicked(null)
     },
-    [canvasPointerDownCapture, selectedZ, legendClicked],
+    [canvasPointerDownCapture, selectedZ],
   )
 
   const handleInspectorClose = useCallback(() => {
@@ -218,8 +201,9 @@ export default function App() {
       if (!didInitialFitRef.current || forceFullFit) {
         didInitialFitRef.current = true
         forceFullFit = false
-        const { width: tw, height: th } =
-          periodicTableOuterSizePxForLayout(layoutModeForFitRef.current)
+        const { width: tw, height: th } = periodicTableOuterSizePxForLayout(
+          layoutModeForFitRef.current,
+        )
         const z = Math.min(vw / tw, vh / th) * 0.92
         setCamera({
           x: (vw - tw * z) / 2,
@@ -247,15 +231,6 @@ export default function App() {
   }, [selectedZ])
 
   const isMobileViewport = viewportSize.w > 0 && viewportSize.w <= 720
-  const legendPanelOpen = !isMobileViewport || legendMenuOpen
-
-  useEffect(() => {
-    if (!isMobileViewport) setLegendMenuOpen(false)
-  }, [isMobileViewport])
-
-  useEffect(() => {
-    if (selectedZ != null) setLegendMenuOpen(false)
-  }, [selectedZ])
 
   /**
    * Posun kamery podle skutečné pozice buňky vůči plátnu (getBoundingClientRect).
@@ -334,7 +309,7 @@ export default function App() {
         e.preventDefault()
         if (inspectorFullscreen) setInspectorFullscreen(false)
         else if (selectedZ != null) setSelectedZ(null)
-        else if (legendClicked != null) setLegendClicked(null)
+        else setExploreProperty(DEFAULT_EXPLORE_PROPERTY_STATE)
         return
       }
       if (selectedZ == null) return
@@ -362,7 +337,7 @@ export default function App() {
   }, [
     selectedZ,
     inspectorFullscreen,
-    legendClicked,
+    exploreProperty.kind,
     layoutMode,
     handleSelectElement,
   ])
@@ -415,65 +390,25 @@ export default function App() {
     applyZoomAtCenter(cameraRef.current.zoom * 1.12)
   }, [applyZoomAtCenter])
 
-  /** Stejný výpočet jako při počátečním „fit“ — celá tabulka vycentrovaná v plátně. */
+  /**
+   * Vycentruje výřez na mřížku prvků (větší zoom); čísla os zůstávají v dokumentu —
+   * typicky mimo aktuální záběr vlevo a nahoře, po posunu plátna je uvidíš.
+   */
   const handleResetTableView = useCallback(() => {
     const el = viewportRef.current
     if (!el) return
     const vw = el.clientWidth
     const vh = el.clientHeight
     if (vw < 16 || vh < 16) return
-    const { width: tw, height: th } =
-      periodicTableOuterSizePxForLayout(layoutMode)
-    const z = Math.min(vw / tw, vh / th) * 0.92
+    const { x: gx, y: gy, width: gw, height: gh } =
+      periodicTableGridRectInRootPx(layoutMode)
+    const z = Math.min(vw / gw, vh / gh) * 0.92
     setCamera({
-      x: (vw - tw * z) / 2,
-      y: (vh - th * z) / 2,
+      x: vw / 2 - (gx + gw / 2) * z,
+      y: vh / 2 - (gy + gh / 2) * z,
       zoom: z,
     })
   }, [layoutMode, setCamera])
-
-  const updateLegendFooterScrollHints = useCallback(() => {
-    const el = legendFooterScrollRef.current
-    if (!el) return
-    const { scrollLeft, scrollWidth, clientWidth } = el
-    const maxScroll = Math.max(0, scrollWidth - clientWidth)
-    const overflow = maxScroll > 2
-    setLegendFooterScroll({
-      overflow,
-      canLeft: overflow && scrollLeft > 2,
-      canRight: overflow && scrollLeft < maxScroll - 2,
-    })
-  }, [])
-
-  useLayoutEffect(() => {
-    const el = legendFooterScrollRef.current
-    if (!el) return
-    const inner = el.firstElementChild as HTMLElement | null
-    const ro = new ResizeObserver(() => {
-      updateLegendFooterScrollHints()
-    })
-    ro.observe(el)
-    if (inner) ro.observe(inner)
-    el.addEventListener('scroll', updateLegendFooterScrollHints, { passive: true })
-    updateLegendFooterScrollHints()
-    return () => {
-      ro.disconnect()
-      el.removeEventListener('scroll', updateLegendFooterScrollHints)
-    }
-  }, [updateLegendFooterScrollHints, camera.zoom, layoutMode, selectedZ])
-
-  const scrollLegendFooter = useCallback(
-    (dir: -1 | 1) => {
-      const el = legendFooterScrollRef.current
-      if (!el) return
-      const w = el.clientWidth
-      el.scrollBy({
-        left: dir * Math.max(100, Math.floor(w * 0.65)),
-        behavior: 'smooth',
-      })
-    },
-    [],
-  )
 
   return (
     <div className="app-shell">
@@ -512,11 +447,11 @@ export default function App() {
               onSelect={handleSelectElement}
               onExpandLayout={handleExpandLayout}
               onCompactLayout={handleCompactLayout}
-              legendHighlight={legendHighlight}
               viewportWidth={viewportSize.w}
               viewportHeight={viewportSize.h}
               onNavigate={navigateSelect}
               inspectorFullscreen={inspectorFullscreen}
+              exploreProperty={exploreProperty}
             />
           </InfiniteCanvas>
         </div>
@@ -559,13 +494,14 @@ export default function App() {
           .filter(Boolean)
           .join(' ')}
       >
+        <div className="app-footer-left-stack">
         <div className="app-zoom-control" role="group" aria-label="Přiblížení tabulky">
           <button
             type="button"
             className="app-zoom-btn app-zoom-btn--reset"
             onClick={handleResetTableView}
-            aria-label="Celá tabulka — resetovat zoom a pozici"
-            title="Celá tabulka"
+            aria-label="Zarovnat pohled na mřížku prvků (čísla os zůstávají, posunem plátna je uvidíš)"
+            title="Zarovnat na mřížku prvků"
           >
             <svg
               className="app-zoom-btn-icon"
@@ -677,124 +613,13 @@ export default function App() {
               />
             </svg>
           </button>
-          <button
-            type="button"
-            className="app-legend-hamburger"
-            aria-expanded={legendMenuOpen}
-            aria-controls="app-legend-footer-panel"
-            id="app-legend-menu-toggle"
-            onClick={() => setLegendMenuOpen((o) => !o)}
-            aria-label={
-              legendMenuOpen
-                ? 'Skrýt skupiny prvků'
-                : 'Skupiny prvků — zobrazit'
-            }
-            title="Skupiny prvků"
-          >
-            <svg
-              className="app-legend-hamburger-icon"
-              viewBox="0 0 24 24"
-              width="22"
-              height="22"
-              aria-hidden
-            >
-              <path
-                d="M4 7h16M4 12h16M4 17h16"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-              />
-            </svg>
-          </button>
         </div>
-        <div
-          className={[
-            'app-legend-footer-panel',
-            legendPanelOpen ? 'app-legend-footer-panel--open' : '',
-          ]
-            .filter(Boolean)
-            .join(' ')}
-          id="app-legend-footer-panel"
-          role="region"
-          aria-labelledby="app-legend-menu-toggle"
-          hidden={!legendPanelOpen}
-        >
-        <button
-          type="button"
-          className={[
-            'app-legend-scroll-btn',
-            legendFooterScroll.overflow ? '' : 'app-legend-scroll-btn--hidden',
-          ]
-            .filter(Boolean)
-            .join(' ')}
-          onClick={() => scrollLegendFooter(-1)}
-          disabled={!legendFooterScroll.overflow || !legendFooterScroll.canLeft}
-          tabIndex={legendFooterScroll.overflow ? 0 : -1}
-          aria-hidden={!legendFooterScroll.overflow}
-          aria-label="Posunout legendu vlevo"
-          title="Posunout legendu vlevo"
-        >
-          <svg
-            className="app-legend-scroll-btn-icon"
-            viewBox="0 0 24 24"
-            width="22"
-            height="22"
-            aria-hidden
-          >
-            <path
-              d="M14 7l-5 5 5 5"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2.2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-          </svg>
-        </button>
-        <div
-          className="app-legend-footer-scroll"
-          ref={legendFooterScrollRef}
-        >
-          <CategoryLegendBar
-            highlighted={legendHighlight}
-            clicked={legendClicked}
-            onHover={handleLegendHover}
-            onToggle={handleLegendToggle}
+        </div>
+        <div className="app-explore-footer-panel">
+          <PropertyExplorePanel
+            state={exploreProperty}
+            onChange={setExploreProperty}
           />
-        </div>
-        <button
-          type="button"
-          className={[
-            'app-legend-scroll-btn',
-            legendFooterScroll.overflow ? '' : 'app-legend-scroll-btn--hidden',
-          ]
-            .filter(Boolean)
-            .join(' ')}
-          onClick={() => scrollLegendFooter(1)}
-          disabled={!legendFooterScroll.overflow || !legendFooterScroll.canRight}
-          tabIndex={legendFooterScroll.overflow ? 0 : -1}
-          aria-hidden={!legendFooterScroll.overflow}
-          aria-label="Posunout legendu doprava"
-          title="Posunout legendu doprava"
-        >
-          <svg
-            className="app-legend-scroll-btn-icon"
-            viewBox="0 0 24 24"
-            width="22"
-            height="22"
-            aria-hidden
-          >
-            <path
-              d="M10 7l5 5-5 5"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2.2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-          </svg>
-        </button>
         </div>
       </div>
     </div>

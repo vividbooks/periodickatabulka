@@ -1,31 +1,36 @@
 import { memo } from 'react'
-import { LEGEND_BUTTONS, type LegendCategoryKey } from '../data/legendCategories'
+import type { ExploreLegendBarButton } from '../data/classificationExplore'
 import './CategoryLegendBar.css'
 
 type Props = {
+  buttons: readonly ExploreLegendBarButton[]
   /** Zvýrazněná skupina: hover má přednost před klikem (řídí rodič). */
-  highlighted: LegendCategoryKey | null
+  highlighted: string | null
   /** Sticky stav po kliku (pro aria-pressed). */
-  clicked: LegendCategoryKey | null
-  onHover: (key: LegendCategoryKey | null) => void
+  clicked: string | null
+  onHover: (key: string | null) => void
   /** Druhý klik na stejné tlačítko zruší filtr. */
-  onToggle: (key: LegendCategoryKey) => void
+  onToggle: (key: string) => void
+  /** Volitelný popisek toolbaru (přístupnost). */
+  ariaLabel?: string
 }
 
 export const CategoryLegendBar = memo(function CategoryLegendBar({
+  buttons,
   highlighted,
   clicked,
   onHover,
   onToggle,
+  ariaLabel = 'Legenda skupin prvku periodické tabulky',
 }: Props) {
   return (
     <div
       className="app-legend-bar"
       role="toolbar"
-      aria-label="Legenda skupin prvku periodické tabulky"
+      aria-label={ariaLabel}
       onMouseLeave={() => onHover(null)}
     >
-      {LEGEND_BUTTONS.map((item) => {
+      {buttons.map((item) => {
         const on = highlighted != null && highlighted === item.id
         const off = highlighted != null && highlighted !== item.id
         return (

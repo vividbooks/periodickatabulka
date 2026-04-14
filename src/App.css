@@ -58,16 +58,45 @@
   gap: 4px;
 }
 
+.app-footer-left-stack {
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  align-self: stretch;
+  justify-content: center;
+  gap: 0;
+  min-height: 0;
+}
+
+/* Slider vlastností místo legendy skupin — vyplní zbytek řádku. */
+.app-explore-footer-panel {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: stretch;
+  justify-content: stretch;
+}
+
+.app-explore-footer-panel .app-prop-explore {
+  width: 100%;
+  max-width: none;
+  align-self: stretch;
+  margin: 0;
+  display: flex;
+  align-items: center;
+}
+
 .app-legend-footer {
   position: relative;
   z-index: 1;
   flex-shrink: 0;
   display: flex;
   flex-direction: row;
-  align-items: center;
+  align-items: stretch;
   gap: 4px;
   min-height: 0;
-  padding: 0 6px 0 8px;
+  padding: 10px 6px 12px 8px;
   transition:
     opacity 0.22s ease,
     filter 0.22s ease;
@@ -169,13 +198,15 @@
 }
 
 /* Bobánek ve stylu legendy — bez vnějšího rámečku */
+/* V .app-footer-left-stack (sloupec) musí růst na výšku řádku — jinak zůstane ~50px proti vyššímu explore panelu */
 .app-zoom-control {
-  flex-shrink: 0;
+  flex: 1 1 auto;
+  min-height: 0;
   display: flex;
   flex-direction: row;
   align-items: center;
   gap: 8px;
-  margin: 10px 0 12px;
+  margin: 0;
   padding: 7px 10px 9px;
   border-radius: 10px;
   border: none;
@@ -833,58 +864,13 @@
     padding-bottom: max(16px, env(safe-area-inset-bottom));
   }
 
-  .app-legend-hamburger {
-    display: flex;
-    flex-shrink: 0;
-    align-items: center;
-    justify-content: center;
-    width: 44px;
-    min-width: 44px;
-    height: 44px;
-    padding: 0;
-    margin: 0;
-    color: #e3f2ff;
-    background: rgb(8 14 40 / 0.95);
-    border: 2px solid rgb(68 138 255 / 0.45);
-    border-radius: 8px;
-    cursor: pointer;
-    box-shadow: inset 0 1px 0 0 rgb(255 255 255 / 0.06);
-  }
-
-  .app-legend-hamburger[aria-expanded='true'] {
-    border-color: rgb(107 159 255 / 0.75);
-    background: rgb(20 32 72 / 0.95);
-  }
-
-  .app-legend-hamburger:focus-visible {
-    outline: 2px solid var(--focus-ring);
-    outline-offset: 2px;
-  }
-
-  .app-legend-footer-panel:not(.app-legend-footer-panel--open) {
-    display: none !important;
-  }
-
-  .app-legend-footer-panel--open {
-    flex-direction: column;
-    align-items: stretch;
+  .app-explore-footer-panel {
     flex: 1 1 100%;
-    width: 100%;
-    gap: 8px;
+    min-width: 0;
   }
 
-  .app-legend-footer-panel--open .app-legend-footer-scroll {
-    overflow-x: visible;
-    overflow-y: visible;
-    max-height: none;
-  }
-
-  .app-legend-footer-panel--open .app-legend-bar {
-    flex-direction: column;
+  .app-explore-footer-panel .app-prop-explore {
     align-items: stretch;
-    width: 100%;
-    max-width: none;
-    overflow-x: visible;
   }
 
   .app-legend-footer {
@@ -896,7 +882,7 @@
   }
 
   .app-zoom-control {
-    margin: 8px 0 10px;
+    margin: 0;
     padding: 8px 10px 10px;
   }
 
@@ -910,8 +896,4 @@
     height: 6px;
   }
 
-  .app-legend-scroll-btn {
-    width: 40px;
-    min-height: 44px;
-  }
 }
