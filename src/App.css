@@ -1152,7 +1152,8 @@
     width: 100%;
     max-width: none;
     flex-shrink: 0;
-    max-height: min(42vh, 360px);
+    /* Dost místa na posunutý 4× atom v sidebaru (Atom2DModel) + záložky + obsah */
+    max-height: min(88vh, 920px);
     min-height: 0;
     border-left: none;
     border-top: 1px solid var(--border);

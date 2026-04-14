@@ -130,3 +130,23 @@
   outline: 2px solid rgb(107 159 255 / 0.85);
   outline-offset: 2px;
 }
+
+/**
+ * Mobil: atom v rozbaleném inspektoru ~4× větší (layout 25 % šířky + scale(4)),
+ * aby vyplnil šířku panelu a toolbar zůstal pod modelem.
+ */
+@media (max-width: 720px) {
+  .app-inspector:not(.app-inspector--fullscreen) .atom2d-wrap--sidebar .atom2d-disk {
+    width: 25%;
+    max-width: none;
+    margin-left: auto;
+    margin-right: auto;
+    transform: scale(4);
+    transform-origin: top center;
+  }
+
+  .app-inspector:not(.app-inspector--fullscreen) .atom2d-wrap--sidebar .atom2d-toolbar {
+    /* % vůči šířce bloku — doplní výšku vizuálu po scale(4) oproti malé layoutové krabičce */
+    margin-top: 75%;
+  }
+}
