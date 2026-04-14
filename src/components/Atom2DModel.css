@@ -1,8 +1,21 @@
 .atom2d-wrap {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  margin: 0 auto 26px;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+/* Černý kruh jen kolem SVG — pod ním lišta s textem a přehrát */
+.atom2d-disk {
+  position: relative;
   display: flex;
   align-items: center;
   justify-content: center;
-  margin: 0 auto 16px;
+  margin: 0 auto;
   width: 100%;
   max-width: 100%;
   aspect-ratio: 1;
@@ -13,9 +26,73 @@
   box-sizing: border-box;
 }
 
-/* Panel vpravo — posun modelu výš pod hlavičku */
+.atom2d-toolbar {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  width: 100%;
+  padding: 12px 2px 4px;
+  box-sizing: border-box;
+}
+
+.atom2d-shell-summary {
+  margin: 0;
+  flex: 1;
+  min-width: 0;
+  font-size: clamp(0.82rem, 2.35vmin, 1rem);
+  font-weight: 600;
+  line-height: 1.4;
+  color: #fff;
+  text-align: left;
+}
+
+/* Pauza / přehrát — jen ikonka vpravo */
+.atom2d-spin-toggle {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  margin: 0;
+  border: 1px solid rgb(107 159 255 / 0.5);
+  border-radius: 12px;
+  background: rgb(8 14 40 / 0.92);
+  color: #e3f2ff;
+  font: inherit;
+  cursor: pointer;
+  box-shadow:
+    0 2px 10px rgb(0 0 0 / 0.45),
+    inset 0 1px 0 0 rgb(255 255 255 / 0.06);
+  transition:
+    background 0.15s ease,
+    border-color 0.15s ease,
+    color 0.15s ease;
+}
+
+.atom2d-spin-toggle:hover {
+  background: rgb(20 32 72 / 0.95);
+  border-color: rgb(139 180 255 / 0.6);
+  color: #fff;
+}
+
+.atom2d-spin-toggle:focus-visible {
+  outline: 2px solid var(--focus-ring, #6b9fff);
+  outline-offset: 3px;
+}
+
+.atom2d-spin-toggle__icon {
+  font-size: 1rem;
+  line-height: 1;
+  opacity: 0.95;
+}
+
+/* Panel vpravo — mírný odstup od hlavičky (dřív silně záporný posun) */
 .atom2d-wrap--sidebar {
-  margin-top: -30px;
+  margin-top: 6px;
 }
 
 .atom2d-svg {
@@ -27,9 +104,12 @@
 
 /* Větší kruh ve fullscreen plátně (zoomovatelný náhled) */
 .atom2d-wrap--stage {
-  margin: 0;
+  margin: 0 auto 8px;
   width: min(72vmin, 520px);
   max-width: 100%;
+}
+
+.atom2d-wrap--stage .atom2d-disk {
   padding: 6px;
 }
 
@@ -38,5 +118,15 @@
 }
 
 .atom2d-svg--stage {
-  cursor: pointer;
+  cursor: default;
+}
+
+.atom2d-hit {
+  cursor: default;
+  outline: none;
+}
+
+.atom2d-hit:focus-visible {
+  outline: 2px solid rgb(107 159 255 / 0.85);
+  outline-offset: 2px;
 }

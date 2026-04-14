@@ -268,22 +268,114 @@
 }
 
 @media (max-width: 720px) {
+  .app-prop-explore {
+    padding: 10px 12px 12px;
+    touch-action: manipulation;
+  }
+
   .app-prop-explore--bar {
     flex-direction: column;
     align-items: stretch;
+    gap: 12px;
   }
 
   .app-prop-explore__bar-label {
     width: 100%;
   }
 
-  .app-prop-explore__select--bar {
-    flex: 1;
-    max-width: none;
-    min-width: 0;
+  .app-prop-explore__select {
+    min-height: 48px;
+    padding: 10px 12px;
+    padding-right: 34px;
+    font-size: 16px;
   }
 
+  .app-prop-explore__select--bar {
+    flex: 1;
+    width: 100%;
+    max-width: none;
+    min-width: 0;
+    box-sizing: border-box;
+  }
+
+  /* Horní řádek: dolní mez | reset | horní mez; pod tím celá šířka rozsahu */
   .app-prop-explore__mp-row {
     min-width: 0;
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    grid-template-rows: auto auto;
+    gap: 10px 8px;
+    align-items: center;
+  }
+
+  .app-prop-explore__mp-row > .app-prop-explore__mp-bound:nth-child(1) {
+    grid-column: 1;
+    grid-row: 1;
+    justify-self: start;
+    max-width: none;
+    font-size: 0.72rem;
+    line-height: 1.2;
+  }
+
+  .app-prop-explore__mp-row > .app-prop-explore__dual {
+    grid-column: 1 / -1;
+    grid-row: 2;
+    min-width: 0 !important;
+    max-width: none !important;
+    width: 100%;
+    height: 48px;
+  }
+
+  .app-prop-explore__mp-row > .app-prop-explore__mp-bound:nth-child(3) {
+    grid-column: 3;
+    grid-row: 1;
+    justify-self: end;
+    text-align: right;
+    max-width: none;
+    font-size: 0.72rem;
+    line-height: 1.2;
+  }
+
+  .app-prop-explore__mp-row > .app-prop-explore__icon-btn {
+    grid-column: 2;
+    grid-row: 1;
+    justify-self: center;
+    width: 48px;
+    height: 48px;
+    min-width: 48px;
+    min-height: 48px;
+  }
+
+  .app-prop-explore__dual--bar {
+    min-width: 0;
+    max-width: none;
+  }
+
+  .app-prop-explore__track {
+    height: 12px;
+    border-radius: 6px;
+  }
+
+  .app-prop-explore__range {
+    height: 48px;
+  }
+
+  .app-prop-explore__range::-webkit-slider-thumb {
+    width: 36px;
+    height: 36px;
+    border-width: 3px;
+  }
+
+  .app-prop-explore__range::-moz-range-thumb {
+    width: 36px;
+    height: 36px;
+    border-width: 3px;
+  }
+
+  .app-prop-explore__legend-scroll-btn {
+    min-width: 44px;
+    min-height: 44px;
+    width: 44px;
+    height: 44px;
   }
 }

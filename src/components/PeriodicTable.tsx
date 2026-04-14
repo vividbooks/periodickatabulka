@@ -479,7 +479,9 @@ function PeriodicTableInner({
               )
             : null
         const classColors =
-          exploreProperty.kind === 'classification'
+          exploreProperty.kind === 'classification' &&
+          (exploreProperty.subtype === 'block' ||
+            exploreProperty.subtype === 'state')
             ? tileColorsForExploreClassification(el, exploreProperty.subtype)
             : null
         const tileOverlayColors = propColors ?? classColors

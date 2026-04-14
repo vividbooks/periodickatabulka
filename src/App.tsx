@@ -29,6 +29,7 @@ import {
 import { SHELL_ELECTRONS_BY_ATOMIC_NUMBER } from './data/shellsFromPeriodicTableJson'
 import {
   formatShellsKlm,
+  zsElectronBlockLetter,
   zsPraktickaPoznamka,
   zsValencePopis,
 } from './data/zsChemNarativ'
@@ -797,70 +798,141 @@ const ZsInspectorPanel = memo(function ZsInspectorPanel({
     if (!c || !sh) return null
     const en = c.elektronegativita
     const rho = c.hustota
+    const blok = zsElectronBlockLetter(element)
+    const stavCs =
+      c.stavPriStp.charAt(0).toLocaleUpperCase('cs') + c.stavPriStp.slice(1)
+    const skupPeriod =
+      c.skupina == null ? `— / ${c.perioda}` : `${c.skupina} / ${c.perioda}`
+
     return (
-      <>
-        <h3 className="inspector-section-title inspector-section-title--compact">
+      <div className="inspector-basics-cards">
+        <h3 className="inspector-section-title inspector-section-title--compact inspector-section-title--cards">
           Údaje pro ZŠ
         </h3>
-        <dl className="inspector-dl inspector-dl--compact">
-          <div className="inspector-info-block">
-            <dt>Protonové číslo Z</dt>
-            <dd>{element.z} (v neutrálním atomu stejně e⁻)</dd>
-          </div>
-          <div className="inspector-info-block">
-            <dt>Relativní atomová hmotnost Ar</dt>
-            <dd>{c.ar}</dd>
-          </div>
-          <div className="inspector-info-block">
-            <dt>Perioda (řada tabulky)</dt>
-            <dd>{c.perioda}</dd>
-          </div>
-          <div className="inspector-info-block">
-            <dt>Skupina (IUPAC 1–18)</dt>
-            <dd>
-              {c.skupina == null ? '—' : c.skupina}
-              <span className="inspector-sub"> · {c.skupinaPopis}</span>
-            </dd>
-          </div>
-          <div className="inspector-info-block">
-            <dt>Stav při běžné teplotě</dt>
-            <dd className="inspector-dd-cap">{c.stavPriStp}</dd>
-          </div>
-          <div className="inspector-info-block">
-            <dt>Zařazení (kov / nekov …)</dt>
-            <dd>{c.typLatkyZs}</dd>
-          </div>
-          <div className="inspector-info-block inspector-info-block--full">
-            <dt>Obsazení slupek (K, L, M …)</dt>
-            <dd className="inspector-dd-mono">{formatShellsKlm(sh)}</dd>
-          </div>
-          <div className="inspector-info-block inspector-info-block--full">
-            <dt>Valenční elektrony (slovní výklad)</dt>
-            <dd>{zsValencePopis(element.z, c)}</dd>
-          </div>
-          <div className="inspector-info-block">
-            <dt>
-              Elektronegativita <span className="inspector-dt-sub">χ (Pauling)</span>
-            </dt>
-            <dd>{en ?? '— (v některých tabulkách chybí)'}</dd>
-          </div>
-          <div className="inspector-info-block">
-            <dt>Hustota</dt>
-            <dd>
-              {rho == null
-                ? '— (u plynů často neuvádíme jako u pevných látek)'
-                : `${rho} g·cm⁻³`}
-            </dd>
-          </div>
-        </dl>
+        <section className="inspector-card" aria-label="Základní klasifikace">
+          <ul className="inspector-kv-list">
+              <li className="inspector-kv-row">
+                <span className="inspector-kv-label">Zařazení (ZŠ)</span>
+                <span className="inspector-kv-value">{c.typLatkyZs}</span>
+              </li>
+              <li className="inspector-kv-row">
+                <span className="inspector-kv-label">Skupina / perioda</span>
+                <span className="inspector-kv-value inspector-kv-value--stack">
+                  <span>{skupPeriod}</span>
+                  <span className="inspector-kv-sub">{c.skupinaPopis}</span>
+                </span>
+              </li>
+              <li className="inspector-kv-row">
+                <span className="inspector-kv-label">Stav při běžné teplotě</span>
+                <span className="inspector-kv-value">{stavCs}</span>
+              </li>
+              <li className="inspector-kv-row">
+                <span className="inspector-kv-label">Valenční blok</span>
+                <span className="inspector-kv-value inspector-kv-value--block">
+                  {blok}
+                </span>
+              </li>
+            </ul>
+          </section>
 
-        <p className="inspector-zs-tip inspector-info-block inspector-info-block--full">
-          {zsPraktickaPoznamka(c)}
-        </p>
-      </>
+          <section className="inspector-card" aria-label="Částice v atomu">
+            <ul className="inspector-particle-row">
+              <li className="inspector-particle-cell">
+                <span className="inspector-particle-num">{element.z}</span>
+                <span className="inspector-particle-lbl">P⁺ protony</span>
+              </li>
+              <li
+                className="inspector-particle-cell"
+                title="Počet neutronů záleží na izotopu."
+              >
+                <span className="inspector-particle-num inspector-particle-num--muted">
+                  —
+                </span>
+                <span className="inspector-particle-lbl">N⁰ neutrony</span>
+              </li>
+              <li className="inspector-particle-cell">
+                <span className="inspector-particle-num">{element.z}</span>
+                <span className="inspector-particle-lbl">E⁻ elektrony</span>
+              </li>
+            </ul>
+            <p className="inspector-particle-note">
+              U neutrálního atomu platí počet protonů = počet elektronů. Počet
+              neutronů je u různých izotopů různý.
+            </p>
+          </section>
+
+          <section
+            className="inspector-card inspector-card--inset"
+            aria-label="Hmotnost, vrstvy a valence"
+          >
+            <h4 className="inspector-card__eyebrow">Model atomu</h4>
+            <ul className="inspector-kv-list inspector-kv-list--spaced">
+              <li className="inspector-kv-row">
+                <span className="inspector-kv-label">Rel. atomová hmotnost Ar</span>
+                <span className="inspector-kv-value inspector-kv-value--strong">
+                  {c.ar}
+                </span>
+              </li>
+              <li className="inspector-kv-row inspector-kv-row--col">
+                <span className="inspector-kv-label">Obsazení vrstev (K, L, M …)</span>
+                <span className="inspector-kv-value inspector-kv-value--mono">
+                  {formatShellsKlm(sh)}
+                </span>
+              </li>
+              <li className="inspector-kv-row inspector-kv-row--col">
+                <span className="inspector-kv-label">Valence (výklad ZŠ)</span>
+                <span className="inspector-kv-value inspector-kv-value--prose">
+                  {zsValencePopis(element.z, c)}
+                </span>
+              </li>
+            </ul>
+          </section>
+
+          <section className="inspector-card" aria-label="Veličiny z tabulek">
+            <ul className="inspector-props-grid">
+              <li className="inspector-prop-tile">
+                <span className="inspector-prop-accent" aria-hidden />
+                <div className="inspector-prop-inner">
+                  <span className="inspector-prop-label">Elektronegativita</span>
+                  <span className="inspector-prop-value">{en ?? '—'}</span>
+                  <span className="inspector-prop-unit">Pauling (χ)</span>
+                </div>
+              </li>
+              <li className="inspector-prop-tile">
+                <span className="inspector-prop-accent" aria-hidden />
+                <div className="inspector-prop-inner">
+                  <span className="inspector-prop-label">Hustota</span>
+                  <span className="inspector-prop-value">
+                    {rho == null ? '—' : rho}
+                  </span>
+                  <span className="inspector-prop-unit">g·cm⁻³</span>
+                </div>
+              </li>
+            </ul>
+            {rho == null ? (
+              <p className="inspector-prop-footnote">
+                U plynů se hustota často neuvádí stejně jako u pevných látek.
+              </p>
+            ) : null}
+            {en == null ? (
+              <p className="inspector-prop-footnote">
+                χ u některých prvků (např. vzácné plyny) v tabulkách nebývá.
+              </p>
+            ) : null}
+          </section>
+
+          <section
+            className="inspector-card inspector-card--tip"
+            aria-label="Praktická poznámka"
+          >
+            <h4 className="inspector-card__eyebrow inspector-card__eyebrow--tip">
+              Tip pro výuku
+            </h4>
+            <p className="inspector-tip-text">{zsPraktickaPoznamka(c)}</p>
+          </section>
+      </div>
     )
   }, [element])
-
   const basicsPanel =
     hasData && detailsBody ? (
       detailsBody
@@ -977,22 +1049,8 @@ const ZsInspectorPanel = memo(function ZsInspectorPanel({
             <div
               className="inspector-atom-toolbar"
               role="toolbar"
-              aria-label="Zoom a přehrávání modelu atomu"
+              aria-label="Zoom modelu atomu"
             >
-              <button
-                type="button"
-                className="app-zoom-btn"
-                onClick={() => setAtomSpinPaused((p) => !p)}
-                aria-pressed={atomSpinPaused}
-                aria-label={
-                  atomSpinPaused ? 'Spustit otáčení obalů' : 'Pozastavit otáčení obalů'
-                }
-                title={atomSpinPaused ? 'Přehrát' : 'Pauza'}
-              >
-                <span className="inspector-atom-play-icon" aria-hidden>
-                  {atomSpinPaused ? '▶' : '⏸'}
-                </span>
-              </button>
               <button
                 type="button"
                 className="app-zoom-btn"
@@ -1093,7 +1151,11 @@ const ZsInspectorPanel = memo(function ZsInspectorPanel({
   return (
     <>
       {sidebarHeader}
-      <Atom2DModel element={element} />
+      <Atom2DModel
+        element={element}
+        spinPaused={atomSpinPaused}
+        onSpinPausedChange={setAtomSpinPaused}
+      />
       {inspectorTabsSection}
     </>
   )
