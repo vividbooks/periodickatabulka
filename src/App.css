@@ -58,16 +58,45 @@
   gap: 4px;
 }
 
+.app-footer-left-stack {
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  align-self: stretch;
+  justify-content: center;
+  gap: 0;
+  min-height: 0;
+}
+
+/* Slider vlastností místo legendy skupin — vyplní zbytek řádku. */
+.app-explore-footer-panel {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: stretch;
+  justify-content: stretch;
+}
+
+.app-explore-footer-panel .app-prop-explore {
+  width: 100%;
+  max-width: none;
+  align-self: stretch;
+  margin: 0;
+  display: flex;
+  align-items: center;
+}
+
 .app-legend-footer {
   position: relative;
   z-index: 1;
   flex-shrink: 0;
   display: flex;
   flex-direction: row;
-  align-items: center;
+  align-items: stretch;
   gap: 4px;
   min-height: 0;
-  padding: 0 6px 0 8px;
+  padding: 10px 6px 12px 8px;
   transition:
     opacity 0.22s ease,
     filter 0.22s ease;
@@ -169,13 +198,15 @@
 }
 
 /* Bobánek ve stylu legendy — bez vnějšího rámečku */
+/* V .app-footer-left-stack (sloupec) musí růst na výšku řádku — jinak zůstane ~50px proti vyššímu explore panelu */
 .app-zoom-control {
-  flex-shrink: 0;
+  flex: 1 1 auto;
+  min-height: 0;
   display: flex;
   flex-direction: row;
   align-items: center;
   gap: 8px;
-  margin: 10px 0 12px;
+  margin: 0;
   padding: 7px 10px 9px;
   border-radius: 10px;
   border: none;
@@ -267,19 +298,20 @@
   flex: 1;
 }
 
-/* Jedna řádka: značka + název vedle sebe; pod hlavičkou atom */
+/* Značka vlevo, název vycentrovaný ve zbytku řádku */
 .inspector-header-titles {
-  display: flex;
-  flex-direction: row;
-  flex-wrap: wrap;
-  align-items: baseline;
-  gap: 0.5rem 0.85rem;
+  display: grid;
+  grid-template-columns: auto 1fr;
+  align-items: center;
+  column-gap: 0.85rem;
+  row-gap: 0.35rem;
   min-width: 0;
   width: 100%;
 }
 
 .inspector-header-titles .inspector-title {
   margin: 0;
+  grid-column: 1;
   /* poloviční oproti předchozímu zvětšení (3× × 1,3) */
   font-size: calc(1.75rem * 3 * 1.3 * 0.5);
   line-height: 1.05;
@@ -289,17 +321,19 @@
     system-ui,
     sans-serif;
   font-weight: 600;
-  flex-shrink: 0;
 }
 
 .inspector-header-titles .inspector-name {
   margin: 0;
-  flex: 1;
+  grid-column: 2;
   min-width: 0;
-  text-align: left;
-  align-self: center;
-  font-size: 1.05rem;
-  line-height: 1.25;
+  text-align: center;
+  justify-self: stretch;
+  font-size: clamp(1.22rem, 3.6vw, 1.58rem);
+  font-weight: 600;
+  line-height: 1.2;
+  letter-spacing: 0.02em;
+  color: var(--text-primary);
 }
 
 .inspector-header .inspector-title {
@@ -439,6 +473,302 @@
 .inspector-section-title--compact {
   margin: 0 0 6px;
   font-size: 0.7rem;
+}
+
+.inspector-section-title--cards {
+  margin: 0 0 10px;
+  font-size: clamp(0.78rem, 2.1vw, 0.95rem);
+  letter-spacing: 0.07em;
+  color: var(--text-muted);
+}
+
+.inspector-basics-cards {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.inspector-basics-cards > .inspector-section-title--cards:first-child {
+  margin-top: 0;
+}
+
+.inspector-card {
+  margin: 0;
+  padding: clamp(14px, 3vw, 18px) clamp(14px, 3vw, 20px) clamp(16px, 3.2vw, 22px);
+  border-radius: 18px;
+  background: rgb(12 18 32 / 0.72);
+  border: 1px solid rgb(255 255 255 / 0.08);
+  box-shadow:
+    inset 0 1px 0 0 rgb(255 255 255 / 0.04),
+    0 8px 22px rgb(0 0 0 / 0.2);
+}
+
+.inspector-card--inset {
+  background: rgb(8 14 28 / 0.55);
+  border-color: rgb(255 255 255 / 0.06);
+  box-shadow: inset 0 1px 0 0 rgb(255 255 255 / 0.04);
+}
+
+.inspector-card--tip {
+  background: linear-gradient(
+    145deg,
+    rgb(34 120 80 / 0.16),
+    rgb(12 22 40 / 0.58)
+  );
+  border-color: rgb(120 200 150 / 0.25);
+  box-shadow: inset 0 1px 0 0 rgb(255 255 255 / 0.05);
+}
+
+.inspector-card__eyebrow {
+  margin: 0 0 12px;
+  font-size: clamp(0.68rem, 2vw, 0.84rem);
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.inspector-card__eyebrow--tip {
+  color: rgb(160 220 185 / 0.95);
+  letter-spacing: 0.12em;
+}
+
+.inspector-kv-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.inspector-kv-list--spaced {
+  gap: clamp(14px, 2.5vw, 18px);
+}
+
+.inspector-kv-row {
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  padding: clamp(10px, 2vw, 14px) 0;
+  border-bottom: 1px solid rgb(255 255 255 / 0.06);
+}
+
+.inspector-kv-row:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+.inspector-kv-row:first-child {
+  padding-top: 0;
+}
+
+.inspector-kv-row--col {
+  flex-direction: column;
+  align-items: stretch;
+}
+
+.inspector-kv-row--col .inspector-kv-label {
+  flex: none;
+  width: 100%;
+}
+
+.inspector-kv-row--col .inspector-kv-value {
+  flex: none;
+  width: 100%;
+  text-align: left;
+}
+
+.inspector-kv-label {
+  flex: 0 1 46%;
+  font-size: clamp(0.65rem, 2.05vw, 0.82rem);
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: rgb(148 163 184 / 0.92);
+  line-height: 1.35;
+}
+
+.inspector-kv-value {
+  flex: 1;
+  min-width: 0;
+  text-align: right;
+  font-size: clamp(0.92rem, 3.15vw, 1.2rem);
+  font-weight: 600;
+  color: var(--text-primary);
+  line-height: 1.3;
+}
+
+.inspector-kv-value--stack {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 4px;
+}
+
+.inspector-kv-sub {
+  font-size: clamp(0.72rem, 2.2vw, 0.88rem);
+  font-weight: 400;
+  color: var(--text-muted);
+  text-align: right;
+  line-height: 1.3;
+}
+
+.inspector-kv-value--block {
+  font-family:
+    'Fenomen Sans Symbol',
+    'Fenomen Sans',
+    system-ui,
+    sans-serif;
+  font-size: clamp(1.2rem, 3.8vw, 1.55rem);
+  font-weight: 700;
+  text-transform: lowercase;
+  color: rgb(199 210 254);
+}
+
+.inspector-kv-value--strong {
+  font-size: clamp(1.05rem, 3.4vw, 1.35rem);
+  font-variant-numeric: tabular-nums;
+}
+
+.inspector-kv-value--mono {
+  font-size: clamp(0.84rem, 2.75vw, 1.05rem);
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+  font-family: ui-monospace, 'Cascadia Code', monospace;
+}
+
+.inspector-kv-row--col .inspector-kv-value--mono {
+  text-align: left;
+}
+
+.inspector-kv-value--prose {
+  text-align: left;
+  font-size: clamp(0.84rem, 2.75vw, 1.05rem);
+  font-weight: 400;
+  line-height: 1.45;
+}
+
+.inspector-particle-row {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.inspector-particle-cell {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: clamp(12px, 2.5vw, 16px) clamp(4px, 1.5vw, 8px);
+  border-radius: 14px;
+  background: rgb(255 255 255 / 0.05);
+  border: 1px solid rgb(255 255 255 / 0.07);
+}
+
+.inspector-particle-num {
+  font-size: clamp(1.45rem, 4.6vw, 2rem);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: var(--text-primary);
+  line-height: 1.1;
+}
+
+.inspector-particle-num--muted {
+  color: rgb(148 163 184 / 0.75);
+  font-weight: 500;
+}
+
+.inspector-particle-lbl {
+  margin-top: 8px;
+  font-size: clamp(0.62rem, 1.95vw, 0.76rem);
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: rgb(148 163 184 / 0.88);
+  line-height: 1.2;
+}
+
+.inspector-particle-note {
+  margin: 12px 0 0;
+  font-size: clamp(0.72rem, 2.2vw, 0.88rem);
+  line-height: 1.4;
+  color: var(--text-muted);
+}
+
+.inspector-props-grid {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.inspector-prop-tile {
+  display: flex;
+  flex-direction: row;
+  align-items: stretch;
+  min-height: clamp(4.75rem, 14vw, 6.25rem);
+  border-radius: 14px;
+  background: rgb(255 255 255 / 0.04);
+  border: 1px solid rgb(255 255 255 / 0.07);
+  overflow: hidden;
+}
+
+.inspector-prop-accent {
+  width: 4px;
+  flex-shrink: 0;
+  background: linear-gradient(180deg, rgb(129 140 248), rgb(56 189 248));
+}
+
+.inspector-prop-inner {
+  flex: 1;
+  padding: clamp(10px, 2.2vw, 14px) clamp(11px, 2.4vw, 16px) clamp(12px, 2.5vw, 16px);
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  min-width: 0;
+}
+
+.inspector-prop-label {
+  font-size: clamp(0.6rem, 1.85vw, 0.76rem);
+  font-weight: 600;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: rgb(148 163 184 / 0.9);
+}
+
+.inspector-prop-value {
+  font-size: clamp(1.08rem, 3.6vw, 1.42rem);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: var(--text-primary);
+  line-height: 1.15;
+}
+
+.inspector-prop-unit {
+  font-size: clamp(0.72rem, 2.1vw, 0.88rem);
+  color: var(--text-muted);
+}
+
+.inspector-prop-footnote {
+  margin: 10px 0 0;
+  font-size: clamp(0.68rem, 2vw, 0.82rem);
+  line-height: 1.35;
+  color: var(--text-muted);
+}
+
+.inspector-tip-text {
+  margin: 0;
+  font-size: clamp(0.86rem, 2.8vw, 1.08rem);
+  line-height: 1.45;
+  color: rgb(226 245 235 / 0.95);
 }
 
 .inspector-title {
@@ -822,7 +1152,8 @@
     width: 100%;
     max-width: none;
     flex-shrink: 0;
-    max-height: min(42vh, 360px);
+    /* Dost místa na posunutý 4× atom v sidebaru (Atom2DModel) + záložky + obsah */
+    max-height: min(88vh, 920px);
     min-height: 0;
     border-left: none;
     border-top: 1px solid var(--border);
@@ -833,85 +1164,77 @@
     padding-bottom: max(16px, env(safe-area-inset-bottom));
   }
 
-  .app-legend-hamburger {
-    display: flex;
-    flex-shrink: 0;
-    align-items: center;
-    justify-content: center;
-    width: 44px;
-    min-width: 44px;
-    height: 44px;
-    padding: 0;
-    margin: 0;
-    color: #e3f2ff;
-    background: rgb(8 14 40 / 0.95);
-    border: 2px solid rgb(68 138 255 / 0.45);
-    border-radius: 8px;
-    cursor: pointer;
-    box-shadow: inset 0 1px 0 0 rgb(255 255 255 / 0.06);
-  }
-
-  .app-legend-hamburger[aria-expanded='true'] {
-    border-color: rgb(107 159 255 / 0.75);
-    background: rgb(20 32 72 / 0.95);
-  }
-
-  .app-legend-hamburger:focus-visible {
-    outline: 2px solid var(--focus-ring);
-    outline-offset: 2px;
-  }
-
-  .app-legend-footer-panel:not(.app-legend-footer-panel--open) {
-    display: none !important;
-  }
-
-  .app-legend-footer-panel--open {
-    flex-direction: column;
-    align-items: stretch;
-    flex: 1 1 100%;
+  .app-explore-footer-panel {
+    order: 1;
+    flex: 1 1 auto;
+    min-width: 0;
     width: 100%;
-    gap: 8px;
   }
 
-  .app-legend-footer-panel--open .app-legend-footer-scroll {
-    overflow-x: visible;
-    overflow-y: visible;
-    max-height: none;
-  }
-
-  .app-legend-footer-panel--open .app-legend-bar {
-    flex-direction: column;
+  .app-explore-footer-panel .app-prop-explore {
     align-items: stretch;
-    width: 100%;
-    max-width: none;
-    overflow-x: visible;
   }
 
   .app-legend-footer {
-    flex-wrap: wrap;
-    row-gap: 2px;
+    flex-direction: column;
+    align-items: stretch;
+    flex-wrap: nowrap;
+    gap: 10px;
     padding-left: max(8px, env(safe-area-inset-left));
-    padding-right: max(6px, env(safe-area-inset-right));
-    padding-bottom: max(4px, env(safe-area-inset-bottom));
+    padding-right: max(8px, env(safe-area-inset-right));
+    padding-top: 10px;
+    padding-bottom: max(10px, env(safe-area-inset-bottom));
+  }
+
+  .app-footer-left-stack {
+    order: 2;
+    width: 100%;
+    flex: 0 0 auto;
+    align-self: stretch;
   }
 
   .app-zoom-control {
-    margin: 8px 0 10px;
-    padding: 8px 10px 10px;
+    margin: 0;
+    width: 100%;
+    box-sizing: border-box;
+    padding: 10px 12px 12px;
+    gap: 10px;
+    justify-content: space-between;
   }
 
   .app-zoom-btn {
-    min-width: 44px;
-    min-height: 44px;
+    width: 48px;
+    height: 48px;
+    min-width: 48px;
+    min-height: 48px;
   }
 
   .app-zoom-slider {
-    width: min(28vw, 88px);
-    height: 6px;
+    flex: 1 1 auto;
+    width: auto;
+    min-width: 100px;
+    max-width: none;
+    height: 8px;
+    touch-action: pan-y;
   }
 
-  .app-legend-scroll-btn {
-    width: 40px;
-    min-height: 44px;
+  .inspector-atom-toolbar {
+    bottom: max(12px, env(safe-area-inset-bottom));
+    left: 8px;
+    right: 8px;
+    transform: none;
+    max-width: none;
+    width: auto;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+
+  .inspector-atom-zoom-slider {
+    flex: 1 1 auto;
+    width: auto;
+    min-width: 96px;
+    max-width: 200px;
+    height: 8px;
   }
 }

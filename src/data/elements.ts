@@ -375,16 +375,23 @@ export const PERIODIC_TABLE_AXIS_ELEMENT_GUTTER_PX =
  */
 export const PERIODIC_TABLE_EXPANDED_NUB_EXTRA_PX = 52
 
-/** Vnější rozměr mřížky v pixelech obsahu (padding = gap), včetně os. */
+/** Vnější rozměr mřížky v pixelech obsahu (padding = gap). S osami = čísla skupin/period. */
 export function periodicTableOuterSizeForGrid(
   cols: number,
   rows: number,
   gap: number = PERIODIC_TABLE_GAP_PX,
+  includeAxisLabels: boolean = true,
 ): { width: number; height: number } {
   const cell = PERIODIC_TABLE_CELL_PX
   const pad = gap
   const underShift = cell * 0.05
   const rowGap = gap + underShift
+  if (!includeAxisLabels) {
+    return {
+      width: pad * 2 + cols * cell + Math.max(0, cols - 1) * gap,
+      height: pad * 2 + rows * cell + Math.max(0, rows - 1) * rowGap,
+    }
+  }
   const axisCol = PERIODIC_TABLE_AXIS_COL_PX
   const axisRow = PERIODIC_TABLE_AXIS_ROW_PX
   /* mezera mezi osami a dlaždicemi (jedna „prázdná“ buňka + gap) */
@@ -406,9 +413,15 @@ export function periodicTableOuterSizeForGrid(
 
 export function periodicTableOuterSizePxForLayout(
   mode: PeriodicTableLayoutMode,
+  includeAxisLabels: boolean = true,
 ): { width: number; height: number } {
   const { cols, rows } = periodicTableGridDimensions(mode)
-  const base = periodicTableOuterSizeForGrid(cols, rows, PERIODIC_TABLE_GAP_PX)
+  const base = periodicTableOuterSizeForGrid(
+    cols,
+    rows,
+    PERIODIC_TABLE_GAP_PX,
+    includeAxisLabels,
+  )
   if (mode === 'expanded') {
     return {
       width: base.width,
@@ -420,6 +433,34 @@ export function periodicTableOuterSizePxForLayout(
 
 export function periodicTableOuterSizePx(): { width: number; height: number } {
   return periodicTableOuterSizePxForLayout('compact')
+}
+
+/**
+ * Obdélník jen mřížky prvků (bez čísel skupin a period) v souřadném systému
+ * `.periodic-table-root` — pro zarovnání kamery na mřížku při zachování os v DOM.
+ */
+export function periodicTableGridRectInRootPx(
+  layoutMode: PeriodicTableLayoutMode,
+): { x: number; y: number; width: number; height: number } {
+  const { cols, rows } = periodicTableGridDimensions(layoutMode)
+  const cell = PERIODIC_TABLE_CELL_PX
+  const gap = PERIODIC_TABLE_GAP_PX
+  const pad = gap
+  const rowGap = gap + cell * 0.05
+  const x =
+    pad +
+    PERIODIC_TABLE_AXIS_COL_PX +
+    PERIODIC_TABLE_AXIS_ELEMENT_GUTTER_PX
+  const y =
+    pad +
+    PERIODIC_TABLE_AXIS_ROW_PX +
+    PERIODIC_TABLE_AXIS_ELEMENT_GUTTER_PX
+  return {
+    x,
+    y,
+    width: cols * cell + Math.max(0, cols - 1) * gap,
+    height: rows * cell + Math.max(0, rows - 1) * rowGap,
+  }
 }
 
 /**

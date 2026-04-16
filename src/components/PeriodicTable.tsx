@@ -14,15 +14,24 @@ import {
   type PeriodicTableLayoutMode,
 } from '../data/elements'
 import {
-  elementMatchesLegend,
-  type LegendCategoryKey,
-} from '../data/legendCategories'
+  elementMatchesExploreClassification,
+} from '../data/classificationExplore'
+import { tileColorsForExploreClassification } from '../data/classificationTileColors'
 import { ELEMENT_LATIN_PAREN } from '../data/elementLatinParen'
 import {
   axisBandHint,
   expandedColumnHeaderLabel,
 } from '../data/axisHints'
 import { tileMarkersFromCore } from '../data/elementTileMarkers'
+import {
+  exploreClassificationActiveKey,
+  type ExplorePropertyState,
+} from '../data/exploreProperty'
+import {
+  PROPERTY_SCALE,
+  scalarValueForExploreProperty,
+} from '../data/explorePropertyConfig'
+import { tileColorsForExploreScalar } from '../data/tileColorsForExploreScalar'
 import { ZS_ELEMENT_CORE } from '../data/zsElementCore'
 import { PT_MARKER_TITLES, PtMarkerSvg, PtTileMarkers } from './PtTileMarkers'
 import './PeriodicTable.css'
@@ -40,8 +49,6 @@ type Props = {
   onExpandLayout?: () => void
   /** Rozšířený režim: klik na bobánek pod Ac přepne zpět na kompaktní rozvržení. */
   onCompactLayout?: () => void
-  /** Legenda dole: hover má přednost; null = bez filtru podle skupiny. */
-  legendHighlight: LegendCategoryKey | null
   /** Rozměry plátna (`.infinite-canvas-viewport`) — pro omezení 3× zvětšení při silném zoomu. */
   viewportWidth: number
   viewportHeight: number
@@ -49,12 +56,17 @@ type Props = {
   onNavigate: (dir: GridNavDirection) => void
   /** V celoobrazovkovém inspektoru šipky u buňky skrýt. */
   inspectorFullscreen: boolean
+  /** Zvýraznění podle vlastnosti (bod tání, …). */
+  exploreProperty: ExplorePropertyState
 }
 
 /** Prah v pixelech strany buňky na obrazovce (š × zoom), dříve ekvivalent 118×zoom. */
 const LOD_CELL_EDGE_PX = [47.2, 68.44, 92.04, 123.9] as const
 
-/** 0 = jen značka … 4 = komplet vč. χ, latiny a rohových značek (viz CSS [data-pt-lod]). */
+/** Při LOD 0–1 (daleké zobrazení): kratší názvy +30 % oproti stejnému základu — delší beze změny. */
+const LOD0_CS_NAME_BRIEF_MAX_CHARS = 7
+
+/** 0 = značka + český název … 4 = komplet vč. χ, latiny a rohových značek (viz CSS [data-pt-lod]). */
 function detailLevelForZoom(zoom: number): 0 | 1 | 2 | 3 | 4 {
   const edgePx = PERIODIC_TABLE_CELL_PX * zoom
   if (edgePx < LOD_CELL_EDGE_PX[0]) return 0
@@ -322,11 +334,11 @@ function PeriodicTableInner({
   onSelect,
   onExpandLayout,
   onCompactLayout,
-  legendHighlight,
   viewportWidth,
   viewportHeight,
   onNavigate,
   inspectorFullscreen,
+  exploreProperty,
 }: Props) {
   const lod = detailLevelForZoom(zoom)
   const selectedTileScale = useMemo(
@@ -409,6 +421,9 @@ function PeriodicTableInner({
     if (raw.length > 0) axisCaption = raw
   }
 
+  const classificationActiveKey =
+    exploreClassificationActiveKey(exploreProperty)
+
   const cells: ReactNode[] = []
   for (let row = 1; row <= gridRows; row++) {
     for (let col = 1; col <= gridCols; col++) {
@@ -420,12 +435,28 @@ function PeriodicTableInner({
       if (el) {
         const selected = el.z === selectedZ
         const legendMatch =
-          legendHighlight == null ||
-          elementMatchesLegend(el.category, legendHighlight)
+          classificationActiveKey == null ||
+          (exploreProperty.kind === 'classification' &&
+            elementMatchesExploreClassification(
+              el,
+              exploreProperty.subtype,
+              classificationActiveKey,
+            ))
+        const propScalar =
+          exploreProperty.kind === 'property'
+            ? scalarValueForExploreProperty(el.z, exploreProperty.property)
+            : null
+        let propOutside = false
+        if (exploreProperty.kind === 'property' && propScalar != null) {
+          propOutside =
+            propScalar < exploreProperty.rangeMin ||
+            propScalar > exploreProperty.rangeMax
+        }
         const faded =
           (selectedZ != null && !selected) ||
-          (legendHighlight != null && !legendMatch) ||
-          (effectiveAxisHover != null && !inAxisBand)
+          (classificationActiveKey != null && !legendMatch) ||
+          (effectiveAxisHover != null && !inAxisBand) ||
+          propOutside
         const core = ZS_ELEMENT_CORE[el.z]
         const chi = core?.elektronegativita ?? null
         const ar = formatArForTile(core?.ar ?? '—')
@@ -434,6 +465,38 @@ function PeriodicTableInner({
           el.z,
           core?.stavPriStp ?? 'pevná',
         )
+
+        const scaleMeta =
+          exploreProperty.kind === 'property'
+            ? PROPERTY_SCALE[exploreProperty.property]
+            : null
+        const propColors =
+          scaleMeta != null
+            ? tileColorsForExploreScalar(
+                propScalar,
+                scaleMeta.min,
+                scaleMeta.max,
+              )
+            : null
+        const classColors =
+          exploreProperty.kind === 'classification' &&
+          (exploreProperty.subtype === 'block' ||
+            exploreProperty.subtype === 'state')
+            ? tileColorsForExploreClassification(el, exploreProperty.subtype)
+            : null
+        const tileOverlayColors = propColors ?? classColors
+        const slotStyle = {
+          gridRow: row,
+          gridColumn: col,
+          ...(tileOverlayColors
+            ? {
+                '--tile-face': tileOverlayColors.face,
+                '--tile-rim-top': tileOverlayColors.rimTop,
+                '--tile-rim-bot': tileOverlayColors.rimBot,
+                '--tile-ink': tileOverlayColors.ink,
+              }
+            : {}),
+        } as CSSProperties
 
         cells.push(
           <div
@@ -452,7 +515,7 @@ function PeriodicTableInner({
             ]
               .filter(Boolean)
               .join(' ')}
-            style={{ gridRow: row, gridColumn: col }}
+            style={slotStyle}
           >
             <div className="pt-cell-underlay" aria-hidden />
             <button
@@ -500,7 +563,19 @@ function PeriodicTableInner({
                 <span className="pt-sym">{el.symbol}</span>
               </div>
               <div className="pt-names">
-                <span className="pt-name-cs">{el.nameCs}</span>
+                <span
+                  className={[
+                    'pt-name-cs',
+                    (lod === 0 || lod === 1) &&
+                    el.nameCs.length <= LOD0_CS_NAME_BRIEF_MAX_CHARS
+                      ? 'pt-name-cs--lod0-brief'
+                      : '',
+                  ]
+                    .filter(Boolean)
+                    .join(' ')}
+                >
+                  {el.nameCs}
+                </span>
                 <span className="pt-name-la">({latin})</span>
               </div>
               <span className="pt-ar">{ar}</span>
@@ -514,7 +589,7 @@ function PeriodicTableInner({
             className={[
               'pt-empty',
               selectedZ != null ||
-              legendHighlight != null ||
+              classificationActiveKey != null ||
               (effectiveAxisHover != null && !inAxisBand)
                 ? 'pt-empty--faded'
                 : '',
@@ -673,10 +748,28 @@ function PeriodicTableInner({
                 })}
               </div>
               <div className="pt-grid-core">
-                <p className="pt-table-title">
-                  <span className="pt-table-title__line">Periodická</span>
-                  <span className="pt-table-title__line">tabulka prvků</span>
-                </p>
+                <div className="pt-table-heading">
+                  <a
+                    className="pt-vividbooks-logo-link"
+                    href="https://vividbooks.com"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    aria-label="Vividbooks — otevře se v novém okně"
+                  >
+                    <img
+                      className="pt-vividbooks-logo"
+                      src={`${import.meta.env.BASE_URL}vividbooks-logo.svg`}
+                      width={527}
+                      height={267}
+                      alt=""
+                      decoding="async"
+                    />
+                  </a>
+                  <p className="pt-table-title">
+                    <span className="pt-table-title__line">Periodická</span>
+                    <span className="pt-table-title__line">tabulka prvků</span>
+                  </p>
+                </div>
                 {layoutMode === 'compact' ? (
                   <FBlockCompactOverlays onExpand={onExpandLayout} />
                 ) : (

@@ -1,0 +1,381 @@
+.app-prop-explore {
+  flex-shrink: 0;
+  margin: 0;
+  padding: 7px 10px 9px;
+  border-radius: 10px;
+  background: #0d1538;
+  color: #e3f2ff;
+  box-shadow: inset 0 1px 0 0 rgb(255 255 255 / 0.08);
+  width: 100%;
+  max-width: none;
+  box-sizing: border-box;
+}
+
+/* Jedna vodorovná lišta: dropdown + volitelně slider */
+.app-prop-explore--bar {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px 14px;
+}
+
+.app-prop-explore__bar-label {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+  margin: 0;
+  font: inherit;
+  cursor: pointer;
+}
+
+.app-prop-explore__select {
+  margin: 0;
+  padding: 7px 10px;
+  font: inherit;
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: #e8f2ff;
+  background: rgb(8 14 40 / 0.95);
+  border: 2px solid rgb(68 138 255 / 0.45);
+  border-radius: 8px;
+  cursor: pointer;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23a8c6ff' d='M3 4.5L6 8l3-3.5'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+  padding-right: 28px;
+}
+
+.app-prop-explore__select--bar {
+  min-width: 11rem;
+  max-width: min(42vw, 220px);
+}
+
+/* ~40 % kratší než původní široký select (dříve 20rem / 26rem) */
+/* ~30 % kratší než předchozí šířka (×0,7) */
+.app-prop-explore__select--wide {
+  min-width: min(38.5vw, 8.4rem);
+  max-width: min(40.6vw, 10.92rem);
+}
+
+.app-prop-explore__select:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+
+.app-prop-explore__legend-scroll {
+  display: flex;
+  flex-direction: row;
+  align-items: stretch;
+  flex: 1;
+  min-width: 0;
+  gap: 4px;
+}
+
+.app-prop-explore__legend-scroll-btn {
+  flex: 0 0 auto;
+  align-self: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 34px;
+  margin: 0;
+  padding: 0;
+  border: 2px solid rgb(68 138 255 / 0.5);
+  border-radius: 8px;
+  background: rgb(8 14 40 / 0.95);
+  color: #a8c6ff;
+  cursor: pointer;
+  transition:
+    opacity 0.15s ease,
+    background 0.15s ease;
+}
+
+.app-prop-explore__legend-scroll-btn:hover {
+  background: rgb(30 58 138 / 0.85);
+  color: #e8f2ff;
+}
+
+.app-prop-explore__legend-scroll-btn:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+
+.app-prop-explore__legend-wrap {
+  flex: 1;
+  min-width: 0;
+  overflow-x: auto;
+  overflow-y: hidden;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: thin;
+}
+
+/*
+ * Scroll je jen na .legend-wrap — vnitřní .app-legend-bar nesmí mít vlastní overflow,
+ * jinak scrollWidth obalu = clientWidth a šipky se neukážou.
+ */
+.app-prop-explore__legend-wrap .app-legend-bar {
+  padding: 4px 2px 6px 0;
+  flex-wrap: nowrap;
+  overflow: visible;
+  width: max-content;
+  max-width: none;
+}
+
+.app-prop-explore__mp-row {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 8px;
+  flex: 1;
+  min-width: min(100%, 280px);
+}
+
+.app-prop-explore__mp-bound {
+  font-size: 0.68rem;
+  font-variant-numeric: tabular-nums;
+  color: rgb(220 235 255 / 0.92);
+  flex-shrink: 0;
+  max-width: 4.2rem;
+  line-height: 1.15;
+}
+
+.app-prop-explore__dual {
+  position: relative;
+  height: 40px;
+}
+
+.app-prop-explore__dual--bar {
+  flex: 1;
+  min-width: 120px;
+  max-width: 520px;
+}
+
+.app-prop-explore__track {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 50%;
+  height: 9px;
+  transform: translateY(-50%);
+  border-radius: 5px;
+  background: linear-gradient(
+    90deg,
+    #3b82f6 0%,
+    #22d3a0 25%,
+    #eab308 50%,
+    #f97316 75%,
+    #ef4444 100%
+  );
+  box-shadow:
+    inset 0 0 0 1px rgb(0 0 0 / 0.35),
+    inset 0 1px 0 0 rgb(255 255 255 / 0.12);
+  pointer-events: none;
+}
+
+.app-prop-explore__range {
+  position: absolute;
+  left: 0;
+  width: 100%;
+  top: 50%;
+  transform: translateY(-50%);
+  height: 32px;
+  margin: 0;
+  padding: 0;
+  background: none;
+  appearance: none;
+  pointer-events: none;
+}
+
+.app-prop-explore__range::-webkit-slider-thumb {
+  appearance: none;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: #0f172a;
+  border: 3px solid #e2e8f0;
+  box-shadow: 0 1px 4px rgb(0 0 0 / 0.45);
+  cursor: grab;
+  pointer-events: auto;
+}
+
+.app-prop-explore__range::-moz-range-thumb {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: #0f172a;
+  border: 3px solid #e2e8f0;
+  box-shadow: 0 1px 4px rgb(0 0 0 / 0.45);
+  cursor: grab;
+  pointer-events: auto;
+}
+
+.app-prop-explore__range--low {
+  z-index: 2;
+}
+
+.app-prop-explore__range--high {
+  z-index: 3;
+}
+
+.app-prop-explore__range:focus-visible::-webkit-slider-thumb {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+
+.app-prop-explore__icon-btn {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  margin: 0;
+  color: #e3f2ff;
+  background: rgb(8 14 40 / 0.9);
+  border: 2px solid rgb(68 138 255 / 0.45);
+  border-radius: 8px;
+  cursor: pointer;
+  box-shadow: inset 0 1px 0 0 rgb(255 255 255 / 0.06);
+  transition:
+    border-color 0.15s ease,
+    background 0.15s ease;
+}
+
+.app-prop-explore__icon-btn:hover {
+  border-color: rgb(107 159 255 / 0.65);
+  background: rgb(20 32 72 / 0.92);
+}
+
+.app-prop-explore__icon-btn:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+
+.app-prop-explore__icon-svg {
+  display: block;
+}
+
+@media (min-width: 721px) {
+  .app-prop-explore--bar {
+    flex-wrap: nowrap;
+  }
+}
+
+@media (max-width: 720px) {
+  .app-prop-explore {
+    padding: 10px 12px 12px;
+    touch-action: manipulation;
+  }
+
+  .app-prop-explore--bar {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+  }
+
+  .app-prop-explore__bar-label {
+    width: 100%;
+  }
+
+  .app-prop-explore__select {
+    min-height: 48px;
+    padding: 10px 12px;
+    padding-right: 34px;
+    font-size: 16px;
+  }
+
+  .app-prop-explore__select--bar {
+    flex: 1;
+    width: 100%;
+    max-width: none;
+    min-width: 0;
+    box-sizing: border-box;
+  }
+
+  /* Horní řádek: dolní mez | reset | horní mez; pod tím celá šířka rozsahu */
+  .app-prop-explore__mp-row {
+    min-width: 0;
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    grid-template-rows: auto auto;
+    gap: 10px 8px;
+    align-items: center;
+  }
+
+  .app-prop-explore__mp-row > .app-prop-explore__mp-bound:nth-child(1) {
+    grid-column: 1;
+    grid-row: 1;
+    justify-self: start;
+    max-width: none;
+    font-size: 0.72rem;
+    line-height: 1.2;
+  }
+
+  .app-prop-explore__mp-row > .app-prop-explore__dual {
+    grid-column: 1 / -1;
+    grid-row: 2;
+    min-width: 0 !important;
+    max-width: none !important;
+    width: 100%;
+    height: 48px;
+  }
+
+  .app-prop-explore__mp-row > .app-prop-explore__mp-bound:nth-child(3) {
+    grid-column: 3;
+    grid-row: 1;
+    justify-self: end;
+    text-align: right;
+    max-width: none;
+    font-size: 0.72rem;
+    line-height: 1.2;
+  }
+
+  .app-prop-explore__mp-row > .app-prop-explore__icon-btn {
+    grid-column: 2;
+    grid-row: 1;
+    justify-self: center;
+    width: 48px;
+    height: 48px;
+    min-width: 48px;
+    min-height: 48px;
+  }
+
+  .app-prop-explore__dual--bar {
+    min-width: 0;
+    max-width: none;
+  }
+
+  .app-prop-explore__track {
+    height: 12px;
+    border-radius: 6px;
+  }
+
+  .app-prop-explore__range {
+    height: 48px;
+  }
+
+  .app-prop-explore__range::-webkit-slider-thumb {
+    width: 36px;
+    height: 36px;
+    border-width: 3px;
+  }
+
+  .app-prop-explore__range::-moz-range-thumb {
+    width: 36px;
+    height: 36px;
+    border-width: 3px;
+  }
+
+  .app-prop-explore__legend-scroll-btn {
+    min-width: 44px;
+    min-height: 44px;
+    width: 44px;
+    height: 44px;
+  }
+}

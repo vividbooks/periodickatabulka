@@ -1,9 +1,10 @@
+import type { ChemicalElement } from './elements'
 import { SHELL_ELECTRONS_BY_ATOMIC_NUMBER } from './shellsFromPeriodicTableJson'
 import type { ZsElementCoreFacts } from './zsElementCore'
 
 const SHELL_LETTERS = ['K', 'L', 'M', 'N', 'O', 'P', 'Q'] as const
 
-/** Popis obsazení slupek jako „K: 2 · L: 8 …“ (terminologie ZŠ). */
+/** Popis obsazení vrstev jako „K: 2 · L: 8 …“ (terminologie ZŠ). */
 export function formatShellsKlm(shells: readonly number[]): string {
   return shells
     .map((c, i) => `${SHELL_LETTERS[i] ?? String(i + 1)}: ${c}`)
@@ -22,10 +23,10 @@ export function zsValencePopis(
   const g = core.skupina
 
   if (g === 1 || g === 2) {
-    return `Valenční slupka obsahuje ${outer} e⁻. Kovy mají tendenci elektron(y) odštěpit (vznikají kationty).`
+    return `Valenční vrstva obsahuje ${outer} e⁻. Kovy mají tendenci elektron(y) odštěpit (vznikají kationty).`
   }
   if (g != null && g >= 13 && g <= 17) {
-    return `Ve valenční slupce je ${outer} e⁻. U nekovů často elektron(y) přijímají nebo sdílejí (vazby, oktet později na ZŠ / SŠ).`
+    return `Ve valenční vrstvě je ${outer} e⁻. U nekovů často elektron(y) přijímají nebo sdílejí (vazby, oktet později na ZŠ / SŠ).`
   }
   if (g === 18) {
     if (z === 2) {
@@ -42,7 +43,7 @@ export function zsValencePopis(
   if (core.typLatkyZs.includes('aktinoid')) {
     return 'Často radioaktivní prvky; chemie podrobně až na SŠ.'
   }
-  return 'Elektronové uspořádání lze ilustrovat modelem slupek vedle.'
+  return 'Elektronové uspořádání lze ilustrovat modelem vrstev vedle.'
 }
 
 /** Jedna odstavcová poznámka vhodná jako „co říct ve škole“. */
@@ -79,4 +80,15 @@ export function zsPraktickaPoznamka(core: ZsElementCoreFacts): string {
     return 'Mnohé izotopy jsou radioaktivní — v ZŠ hlavně principová zmínka, ne pokusy s otevřenými zdroji.'
   }
   return 'Základní částice znáš ze sloupečku a modelu; další vlastnosti podle učebnice a pokusů ve škole.'
+}
+
+/** Blok periodické tabulky (s / p / d / f) pro přehledové zobrazení. */
+export function zsElectronBlockLetter(
+  el: ChemicalElement,
+): 's' | 'p' | 'd' | 'f' {
+  if (el.z <= 2) return 's'
+  if (el.category === 'lanthanide' || el.category === 'actinide') return 'f'
+  if (el.category === 'transition') return 'd'
+  if (el.col <= 2) return 's'
+  return 'p'
 }

@@ -14,25 +14,30 @@ import {
 import { Atom2DModel } from './components/Atom2DModel'
 import { VividbooksPanel } from './components/VividbooksPanel'
 import { WikipediaImagesPanel } from './components/WikipediaImagesPanel'
-import { CategoryLegendBar } from './components/CategoryLegendBar'
 import { InfiniteCanvas } from './components/InfiniteCanvas'
 import { PeriodicTable } from './components/PeriodicTable'
+import { PropertyExplorePanel } from './components/PropertyExplorePanel'
 import {
   ELEMENTS,
   neighborElementInDirection,
+  periodicTableGridRectInRootPx,
   periodicTableOuterSizePxForLayout,
   type ChemicalElement,
   type GridNavDirection,
   type PeriodicTableLayoutMode,
 } from './data/elements'
-import type { LegendCategoryKey } from './data/legendCategories'
 import { SHELL_ELECTRONS_BY_ATOMIC_NUMBER } from './data/shellsFromPeriodicTableJson'
 import {
   formatShellsKlm,
+  zsElectronBlockLetter,
   zsPraktickaPoznamka,
   zsValencePopis,
 } from './data/zsChemNarativ'
 import { vividbooksKnowledgeIdsForElement } from './data/vividbooksLessonsForElement'
+import {
+  DEFAULT_EXPLORE_PROPERTY_STATE,
+  type ExplorePropertyState,
+} from './data/exploreProperty'
 import { ZS_ELEMENT_CORE } from './data/zsElementCore'
 import { useWikipediaImagesForElement } from './hooks/useWikipediaImagesForElement'
 import { useAtomStageViewport } from './hooks/useAtomStageViewport'
@@ -60,25 +65,13 @@ type AtomCanvasPointerHandlers = Pick<
 export default function App() {
   const viewportRef = useRef<HTMLDivElement>(null)
   const atomStageRef = useRef<HTMLDivElement>(null)
-  const legendFooterScrollRef = useRef<HTMLDivElement>(null)
-  const [legendFooterScroll, setLegendFooterScroll] = useState({
-    overflow: false,
-    canLeft: false,
-    canRight: false,
-  })
-  /** Mobil: legenda skrytá za tlačítkem; po otevření pod sebou. */
-  const [legendMenuOpen, setLegendMenuOpen] = useState(false)
   const [selectedZ, setSelectedZ] = useState<number | null>(null)
   const [inspectorFullscreen, setInspectorFullscreen] = useState(false)
   const [layoutMode, setLayoutMode] =
     useState<PeriodicTableLayoutMode>('compact')
-  const [legendClicked, setLegendClicked] = useState<LegendCategoryKey | null>(
-    null,
+  const [exploreProperty, setExploreProperty] = useState<ExplorePropertyState>(
+    DEFAULT_EXPLORE_PROPERTY_STATE,
   )
-  const [legendHovered, setLegendHovered] = useState<LegendCategoryKey | null>(
-    null,
-  )
-  const legendHighlight = legendHovered ?? legendClicked
 
   const {
     camera,
@@ -127,14 +120,6 @@ export default function App() {
     setLayoutMode('compact')
   }, [])
 
-  const handleLegendHover = useCallback((key: LegendCategoryKey | null) => {
-    setLegendHovered(key)
-  }, [])
-
-  const handleLegendToggle = useCallback((key: LegendCategoryKey) => {
-    setLegendClicked((current) => (current === key ? null : key))
-  }, [])
-
   const handleCanvasPointerDownCapture = useCallback(
     (e: PointerEvent<HTMLDivElement>) => {
       canvasPointerDownCapture(e)
@@ -143,9 +128,8 @@ export default function App() {
       if (t.closest('.pt-fblock-expand-nub')) return
       if (t.closest('.pt-element-nav-arrows')) return
       if (selectedZ != null) setSelectedZ(null)
-      if (legendClicked != null) setLegendClicked(null)
     },
-    [canvasPointerDownCapture, selectedZ, legendClicked],
+    [canvasPointerDownCapture, selectedZ],
   )
 
   const handleInspectorClose = useCallback(() => {
@@ -218,8 +202,9 @@ export default function App() {
       if (!didInitialFitRef.current || forceFullFit) {
         didInitialFitRef.current = true
         forceFullFit = false
-        const { width: tw, height: th } =
-          periodicTableOuterSizePxForLayout(layoutModeForFitRef.current)
+        const { width: tw, height: th } = periodicTableOuterSizePxForLayout(
+          layoutModeForFitRef.current,
+        )
         const z = Math.min(vw / tw, vh / th) * 0.92
         setCamera({
           x: (vw - tw * z) / 2,
@@ -247,15 +232,6 @@ export default function App() {
   }, [selectedZ])
 
   const isMobileViewport = viewportSize.w > 0 && viewportSize.w <= 720
-  const legendPanelOpen = !isMobileViewport || legendMenuOpen
-
-  useEffect(() => {
-    if (!isMobileViewport) setLegendMenuOpen(false)
-  }, [isMobileViewport])
-
-  useEffect(() => {
-    if (selectedZ != null) setLegendMenuOpen(false)
-  }, [selectedZ])
 
   /**
    * Posun kamery podle skutečné pozice buňky vůči plátnu (getBoundingClientRect).
@@ -334,7 +310,7 @@ export default function App() {
         e.preventDefault()
         if (inspectorFullscreen) setInspectorFullscreen(false)
         else if (selectedZ != null) setSelectedZ(null)
-        else if (legendClicked != null) setLegendClicked(null)
+        else setExploreProperty(DEFAULT_EXPLORE_PROPERTY_STATE)
         return
       }
       if (selectedZ == null) return
@@ -362,7 +338,7 @@ export default function App() {
   }, [
     selectedZ,
     inspectorFullscreen,
-    legendClicked,
+    exploreProperty.kind,
     layoutMode,
     handleSelectElement,
   ])
@@ -415,65 +391,25 @@ export default function App() {
     applyZoomAtCenter(cameraRef.current.zoom * 1.12)
   }, [applyZoomAtCenter])
 
-  /** Stejný výpočet jako při počátečním „fit“ — celá tabulka vycentrovaná v plátně. */
+  /**
+   * Vycentruje výřez na mřížku prvků (větší zoom); čísla os zůstávají v dokumentu —
+   * typicky mimo aktuální záběr vlevo a nahoře, po posunu plátna je uvidíš.
+   */
   const handleResetTableView = useCallback(() => {
     const el = viewportRef.current
     if (!el) return
     const vw = el.clientWidth
     const vh = el.clientHeight
     if (vw < 16 || vh < 16) return
-    const { width: tw, height: th } =
-      periodicTableOuterSizePxForLayout(layoutMode)
-    const z = Math.min(vw / tw, vh / th) * 0.92
+    const { x: gx, y: gy, width: gw, height: gh } =
+      periodicTableGridRectInRootPx(layoutMode)
+    const z = Math.min(vw / gw, vh / gh) * 0.92
     setCamera({
-      x: (vw - tw * z) / 2,
-      y: (vh - th * z) / 2,
+      x: vw / 2 - (gx + gw / 2) * z,
+      y: vh / 2 - (gy + gh / 2) * z,
       zoom: z,
     })
   }, [layoutMode, setCamera])
-
-  const updateLegendFooterScrollHints = useCallback(() => {
-    const el = legendFooterScrollRef.current
-    if (!el) return
-    const { scrollLeft, scrollWidth, clientWidth } = el
-    const maxScroll = Math.max(0, scrollWidth - clientWidth)
-    const overflow = maxScroll > 2
-    setLegendFooterScroll({
-      overflow,
-      canLeft: overflow && scrollLeft > 2,
-      canRight: overflow && scrollLeft < maxScroll - 2,
-    })
-  }, [])
-
-  useLayoutEffect(() => {
-    const el = legendFooterScrollRef.current
-    if (!el) return
-    const inner = el.firstElementChild as HTMLElement | null
-    const ro = new ResizeObserver(() => {
-      updateLegendFooterScrollHints()
-    })
-    ro.observe(el)
-    if (inner) ro.observe(inner)
-    el.addEventListener('scroll', updateLegendFooterScrollHints, { passive: true })
-    updateLegendFooterScrollHints()
-    return () => {
-      ro.disconnect()
-      el.removeEventListener('scroll', updateLegendFooterScrollHints)
-    }
-  }, [updateLegendFooterScrollHints, camera.zoom, layoutMode, selectedZ])
-
-  const scrollLegendFooter = useCallback(
-    (dir: -1 | 1) => {
-      const el = legendFooterScrollRef.current
-      if (!el) return
-      const w = el.clientWidth
-      el.scrollBy({
-        left: dir * Math.max(100, Math.floor(w * 0.65)),
-        behavior: 'smooth',
-      })
-    },
-    [],
-  )
 
   return (
     <div className="app-shell">
@@ -512,11 +448,11 @@ export default function App() {
               onSelect={handleSelectElement}
               onExpandLayout={handleExpandLayout}
               onCompactLayout={handleCompactLayout}
-              legendHighlight={legendHighlight}
               viewportWidth={viewportSize.w}
               viewportHeight={viewportSize.h}
               onNavigate={navigateSelect}
               inspectorFullscreen={inspectorFullscreen}
+              exploreProperty={exploreProperty}
             />
           </InfiniteCanvas>
         </div>
@@ -559,13 +495,14 @@ export default function App() {
           .filter(Boolean)
           .join(' ')}
       >
+        <div className="app-footer-left-stack">
         <div className="app-zoom-control" role="group" aria-label="Přiblížení tabulky">
           <button
             type="button"
             className="app-zoom-btn app-zoom-btn--reset"
             onClick={handleResetTableView}
-            aria-label="Celá tabulka — resetovat zoom a pozici"
-            title="Celá tabulka"
+            aria-label="Zarovnat pohled na mřížku prvků (čísla os zůstávají, posunem plátna je uvidíš)"
+            title="Zarovnat na mřížku prvků"
           >
             <svg
               className="app-zoom-btn-icon"
@@ -677,124 +614,13 @@ export default function App() {
               />
             </svg>
           </button>
-          <button
-            type="button"
-            className="app-legend-hamburger"
-            aria-expanded={legendMenuOpen}
-            aria-controls="app-legend-footer-panel"
-            id="app-legend-menu-toggle"
-            onClick={() => setLegendMenuOpen((o) => !o)}
-            aria-label={
-              legendMenuOpen
-                ? 'Skrýt skupiny prvků'
-                : 'Skupiny prvků — zobrazit'
-            }
-            title="Skupiny prvků"
-          >
-            <svg
-              className="app-legend-hamburger-icon"
-              viewBox="0 0 24 24"
-              width="22"
-              height="22"
-              aria-hidden
-            >
-              <path
-                d="M4 7h16M4 12h16M4 17h16"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-              />
-            </svg>
-          </button>
         </div>
-        <div
-          className={[
-            'app-legend-footer-panel',
-            legendPanelOpen ? 'app-legend-footer-panel--open' : '',
-          ]
-            .filter(Boolean)
-            .join(' ')}
-          id="app-legend-footer-panel"
-          role="region"
-          aria-labelledby="app-legend-menu-toggle"
-          hidden={!legendPanelOpen}
-        >
-        <button
-          type="button"
-          className={[
-            'app-legend-scroll-btn',
-            legendFooterScroll.overflow ? '' : 'app-legend-scroll-btn--hidden',
-          ]
-            .filter(Boolean)
-            .join(' ')}
-          onClick={() => scrollLegendFooter(-1)}
-          disabled={!legendFooterScroll.overflow || !legendFooterScroll.canLeft}
-          tabIndex={legendFooterScroll.overflow ? 0 : -1}
-          aria-hidden={!legendFooterScroll.overflow}
-          aria-label="Posunout legendu vlevo"
-          title="Posunout legendu vlevo"
-        >
-          <svg
-            className="app-legend-scroll-btn-icon"
-            viewBox="0 0 24 24"
-            width="22"
-            height="22"
-            aria-hidden
-          >
-            <path
-              d="M14 7l-5 5 5 5"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2.2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-          </svg>
-        </button>
-        <div
-          className="app-legend-footer-scroll"
-          ref={legendFooterScrollRef}
-        >
-          <CategoryLegendBar
-            highlighted={legendHighlight}
-            clicked={legendClicked}
-            onHover={handleLegendHover}
-            onToggle={handleLegendToggle}
+        </div>
+        <div className="app-explore-footer-panel">
+          <PropertyExplorePanel
+            state={exploreProperty}
+            onChange={setExploreProperty}
           />
-        </div>
-        <button
-          type="button"
-          className={[
-            'app-legend-scroll-btn',
-            legendFooterScroll.overflow ? '' : 'app-legend-scroll-btn--hidden',
-          ]
-            .filter(Boolean)
-            .join(' ')}
-          onClick={() => scrollLegendFooter(1)}
-          disabled={!legendFooterScroll.overflow || !legendFooterScroll.canRight}
-          tabIndex={legendFooterScroll.overflow ? 0 : -1}
-          aria-hidden={!legendFooterScroll.overflow}
-          aria-label="Posunout legendu doprava"
-          title="Posunout legendu doprava"
-        >
-          <svg
-            className="app-legend-scroll-btn-icon"
-            viewBox="0 0 24 24"
-            width="22"
-            height="22"
-            aria-hidden
-          >
-            <path
-              d="M10 7l5 5-5 5"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2.2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-          </svg>
-        </button>
         </div>
       </div>
     </div>
@@ -972,70 +798,141 @@ const ZsInspectorPanel = memo(function ZsInspectorPanel({
     if (!c || !sh) return null
     const en = c.elektronegativita
     const rho = c.hustota
+    const blok = zsElectronBlockLetter(element)
+    const stavCs =
+      c.stavPriStp.charAt(0).toLocaleUpperCase('cs') + c.stavPriStp.slice(1)
+    const skupPeriod =
+      c.skupina == null ? `— / ${c.perioda}` : `${c.skupina} / ${c.perioda}`
+
     return (
-      <>
-        <h3 className="inspector-section-title inspector-section-title--compact">
+      <div className="inspector-basics-cards">
+        <h3 className="inspector-section-title inspector-section-title--compact inspector-section-title--cards">
           Údaje pro ZŠ
         </h3>
-        <dl className="inspector-dl inspector-dl--compact">
-          <div className="inspector-info-block">
-            <dt>Protonové číslo Z</dt>
-            <dd>{element.z} (v neutrálním atomu stejně e⁻)</dd>
-          </div>
-          <div className="inspector-info-block">
-            <dt>Relativní atomová hmotnost Ar</dt>
-            <dd>{c.ar}</dd>
-          </div>
-          <div className="inspector-info-block">
-            <dt>Perioda (řada tabulky)</dt>
-            <dd>{c.perioda}</dd>
-          </div>
-          <div className="inspector-info-block">
-            <dt>Skupina (IUPAC 1–18)</dt>
-            <dd>
-              {c.skupina == null ? '—' : c.skupina}
-              <span className="inspector-sub"> · {c.skupinaPopis}</span>
-            </dd>
-          </div>
-          <div className="inspector-info-block">
-            <dt>Stav při běžné teplotě</dt>
-            <dd className="inspector-dd-cap">{c.stavPriStp}</dd>
-          </div>
-          <div className="inspector-info-block">
-            <dt>Zařazení (kov / nekov …)</dt>
-            <dd>{c.typLatkyZs}</dd>
-          </div>
-          <div className="inspector-info-block inspector-info-block--full">
-            <dt>Obsazení slupek (K, L, M …)</dt>
-            <dd className="inspector-dd-mono">{formatShellsKlm(sh)}</dd>
-          </div>
-          <div className="inspector-info-block inspector-info-block--full">
-            <dt>Valenční elektrony (slovní výklad)</dt>
-            <dd>{zsValencePopis(element.z, c)}</dd>
-          </div>
-          <div className="inspector-info-block">
-            <dt>
-              Elektronegativita <span className="inspector-dt-sub">χ (Pauling)</span>
-            </dt>
-            <dd>{en ?? '— (v některých tabulkách chybí)'}</dd>
-          </div>
-          <div className="inspector-info-block">
-            <dt>Hustota</dt>
-            <dd>
-              {rho == null
-                ? '— (u plynů často neuvádíme jako u pevných látek)'
-                : `${rho} g·cm⁻³`}
-            </dd>
-          </div>
-        </dl>
+        <section className="inspector-card" aria-label="Základní klasifikace">
+          <ul className="inspector-kv-list">
+              <li className="inspector-kv-row">
+                <span className="inspector-kv-label">Zařazení (ZŠ)</span>
+                <span className="inspector-kv-value">{c.typLatkyZs}</span>
+              </li>
+              <li className="inspector-kv-row">
+                <span className="inspector-kv-label">Skupina / perioda</span>
+                <span className="inspector-kv-value inspector-kv-value--stack">
+                  <span>{skupPeriod}</span>
+                  <span className="inspector-kv-sub">{c.skupinaPopis}</span>
+                </span>
+              </li>
+              <li className="inspector-kv-row">
+                <span className="inspector-kv-label">Stav při běžné teplotě</span>
+                <span className="inspector-kv-value">{stavCs}</span>
+              </li>
+              <li className="inspector-kv-row">
+                <span className="inspector-kv-label">Valenční blok</span>
+                <span className="inspector-kv-value inspector-kv-value--block">
+                  {blok}
+                </span>
+              </li>
+            </ul>
+          </section>
 
-        <p className="inspector-zs-tip inspector-info-block inspector-info-block--full">
-          {zsPraktickaPoznamka(c)}
-        </p>
-      </>
+          <section className="inspector-card" aria-label="Částice v atomu">
+            <ul className="inspector-particle-row">
+              <li className="inspector-particle-cell">
+                <span className="inspector-particle-num">{element.z}</span>
+                <span className="inspector-particle-lbl">P⁺ protony</span>
+              </li>
+              <li
+                className="inspector-particle-cell"
+                title="Počet neutronů záleží na izotopu."
+              >
+                <span className="inspector-particle-num inspector-particle-num--muted">
+                  —
+                </span>
+                <span className="inspector-particle-lbl">N⁰ neutrony</span>
+              </li>
+              <li className="inspector-particle-cell">
+                <span className="inspector-particle-num">{element.z}</span>
+                <span className="inspector-particle-lbl">E⁻ elektrony</span>
+              </li>
+            </ul>
+            <p className="inspector-particle-note">
+              U neutrálního atomu platí počet protonů = počet elektronů. Počet
+              neutronů je u různých izotopů různý.
+            </p>
+          </section>
+
+          <section
+            className="inspector-card inspector-card--inset"
+            aria-label="Hmotnost, vrstvy a valence"
+          >
+            <h4 className="inspector-card__eyebrow">Model atomu</h4>
+            <ul className="inspector-kv-list inspector-kv-list--spaced">
+              <li className="inspector-kv-row">
+                <span className="inspector-kv-label">Rel. atomová hmotnost Ar</span>
+                <span className="inspector-kv-value inspector-kv-value--strong">
+                  {c.ar}
+                </span>
+              </li>
+              <li className="inspector-kv-row inspector-kv-row--col">
+                <span className="inspector-kv-label">Obsazení vrstev (K, L, M …)</span>
+                <span className="inspector-kv-value inspector-kv-value--mono">
+                  {formatShellsKlm(sh)}
+                </span>
+              </li>
+              <li className="inspector-kv-row inspector-kv-row--col">
+                <span className="inspector-kv-label">Valence (výklad ZŠ)</span>
+                <span className="inspector-kv-value inspector-kv-value--prose">
+                  {zsValencePopis(element.z, c)}
+                </span>
+              </li>
+            </ul>
+          </section>
+
+          <section className="inspector-card" aria-label="Veličiny z tabulek">
+            <ul className="inspector-props-grid">
+              <li className="inspector-prop-tile">
+                <span className="inspector-prop-accent" aria-hidden />
+                <div className="inspector-prop-inner">
+                  <span className="inspector-prop-label">Elektronegativita</span>
+                  <span className="inspector-prop-value">{en ?? '—'}</span>
+                  <span className="inspector-prop-unit">Pauling (χ)</span>
+                </div>
+              </li>
+              <li className="inspector-prop-tile">
+                <span className="inspector-prop-accent" aria-hidden />
+                <div className="inspector-prop-inner">
+                  <span className="inspector-prop-label">Hustota</span>
+                  <span className="inspector-prop-value">
+                    {rho == null ? '—' : rho}
+                  </span>
+                  <span className="inspector-prop-unit">g·cm⁻³</span>
+                </div>
+              </li>
+            </ul>
+            {rho == null ? (
+              <p className="inspector-prop-footnote">
+                U plynů se hustota často neuvádí stejně jako u pevných látek.
+              </p>
+            ) : null}
+            {en == null ? (
+              <p className="inspector-prop-footnote">
+                χ u některých prvků (např. vzácné plyny) v tabulkách nebývá.
+              </p>
+            ) : null}
+          </section>
+
+          <section
+            className="inspector-card inspector-card--tip"
+            aria-label="Praktická poznámka"
+          >
+            <h4 className="inspector-card__eyebrow inspector-card__eyebrow--tip">
+              Tip pro výuku
+            </h4>
+            <p className="inspector-tip-text">{zsPraktickaPoznamka(c)}</p>
+          </section>
+      </div>
     )
   }, [element])
-
   const basicsPanel =
     hasData && detailsBody ? (
       detailsBody
@@ -1152,22 +1049,8 @@ const ZsInspectorPanel = memo(function ZsInspectorPanel({
             <div
               className="inspector-atom-toolbar"
               role="toolbar"
-              aria-label="Zoom a přehrávání modelu atomu"
+              aria-label="Zoom modelu atomu"
             >
-              <button
-                type="button"
-                className="app-zoom-btn"
-                onClick={() => setAtomSpinPaused((p) => !p)}
-                aria-pressed={atomSpinPaused}
-                aria-label={
-                  atomSpinPaused ? 'Spustit otáčení obalů' : 'Pozastavit otáčení obalů'
-                }
-                title={atomSpinPaused ? 'Přehrát' : 'Pauza'}
-              >
-                <span className="inspector-atom-play-icon" aria-hidden>
-                  {atomSpinPaused ? '▶' : '⏸'}
-                </span>
-              </button>
               <button
                 type="button"
                 className="app-zoom-btn"
@@ -1268,7 +1151,11 @@ const ZsInspectorPanel = memo(function ZsInspectorPanel({
   return (
     <>
       {sidebarHeader}
-      <Atom2DModel element={element} />
+      <Atom2DModel
+        element={element}
+        spinPaused={atomSpinPaused}
+        onSpinPausedChange={setAtomSpinPaused}
+      />
       {inspectorTabsSection}
     </>
   )
