@@ -4,6 +4,7 @@ export function tileColorsForExploreScalar(
   value: number | null,
   scaleMin: number,
   scaleMax: number,
+  palette: 'rainbow' | 'grayscale' = 'rainbow',
 ): {
   face: string
   rimTop: string
@@ -23,6 +24,16 @@ export function tileColorsForExploreScalar(
     span > 0
       ? Math.max(0, Math.min(1, (value - scaleMin) / span))
       : 0.5
+  if (palette === 'grayscale') {
+    const faceL = 4 + t * 90
+    const rimTopL = Math.min(98, faceL + 12)
+    const rimBotL = Math.max(0, faceL - 16)
+    const face = `hsl(0 0% ${faceL}%)`
+    const rimTop = `hsl(0 0% ${rimTopL}%)`
+    const rimBot = `hsl(0 0% ${rimBotL}%)`
+    const ink = faceL > 58 ? '#0a1020' : '#f8fafc'
+    return { face, rimTop, rimBot, ink }
+  }
   const h = 235 * (1 - t) + 12 * t
   const s = 72
   const faceL = 34 + t * 15

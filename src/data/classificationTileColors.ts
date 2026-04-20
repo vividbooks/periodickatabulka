@@ -5,6 +5,11 @@
 
 import type { ChemicalElement } from './elements'
 import { ELEMENT_BLOCK } from './elementExploreScalars.generated'
+import {
+  eatabilityForElement,
+  lickabilityForElement,
+  type OralSafetyStatus,
+} from './elementLickability'
 import { ZS_ELEMENT_CORE, type ZsStavLatky } from './zsElementCore'
 
 export type ClassificationTileColors = {
@@ -40,9 +45,15 @@ const STATE_FILL: Record<ZsStavLatky, ClassificationTileColors> = {
   ['plynn\u00e1']: quad('#ff7043', '#ffccbc', '#bf360c', '#1a0505'),
 }
 
+const ORAL_STATUS_FILL: Record<OralSafetyStatus, ClassificationTileColors> = {
+  yes: quad('#22c55e', '#bbf7d0', '#166534', '#07130a'),
+  ambiguous: quad('#f59e0b', '#fde68a', '#b45309', '#1b1304'),
+  no: quad('#ef4444', '#fecaca', '#991b1b', '#190505'),
+}
+
 export function tileColorsForExploreClassification(
   el: ChemicalElement,
-  subtype: 'block' | 'state',
+  subtype: 'block' | 'state' | 'lickability' | 'eatability',
 ): ClassificationTileColors {
   switch (subtype) {
     case 'block': {
@@ -54,5 +65,9 @@ export function tileColorsForExploreClassification(
       const st = ZS_ELEMENT_CORE[el.z]?.stavPriStp ?? 'pevná'
       return STATE_FILL[st]
     }
+    case 'lickability':
+      return ORAL_STATUS_FILL[lickabilityForElement(el)]
+    case 'eatability':
+      return ORAL_STATUS_FILL[eatabilityForElement(el)]
   }
 }

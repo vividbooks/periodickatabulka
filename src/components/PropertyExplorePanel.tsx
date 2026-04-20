@@ -213,6 +213,10 @@ export const PropertyExplorePanel = memo(function PropertyExplorePanel({
         return 'Typ kovu / nekovu'
       case 'state':
         return 'Skupenství při STP'
+      case 'lickability':
+        return 'Mohu to olíznout?'
+      case 'eatability':
+        return 'Mohu to sníst?'
       default:
         return 'Klasifikace'
     }
@@ -295,6 +299,12 @@ export const PropertyExplorePanel = memo(function PropertyExplorePanel({
             <option value="c:metal-type">Typ kovu</option>
             <option value="c:state">Skupenství</option>
           </optgroup>
+          <optgroup label="Ostatní">
+            <option value="c:lickability">Mohu to olíznout?</option>
+            <option value="c:eatability">Mohu to sníst?</option>
+            <option value="p:discovery-year">Časový vývoj</option>
+            <option value="p:earth-abundance">Zastoupení % na Zemi</option>
+          </optgroup>
           <optgroup label="Vlastnosti">
             <option value="p:melting-point">Bod tání (°C)</option>
             <option value="p:boiling-point">Bod varu (°C)</option>
@@ -309,88 +319,100 @@ export const PropertyExplorePanel = memo(function PropertyExplorePanel({
       </label>
 
       {state.kind === 'classification' ? (
-        <ScrollableLegendStrip
-          measureDeps={`${state.subtype}-${legendButtons.length}`}
-        >
-          <CategoryLegendBar
-            buttons={legendButtons}
-            highlighted={legendHighlighted}
-            clicked={legendClicked}
-            onHover={onLegendHover}
-            onToggle={onLegendToggle}
-            ariaLabel={legendToolbarLabel}
-          />
-        </ScrollableLegendStrip>
+        <>
+          <ScrollableLegendStrip
+            measureDeps={`${state.subtype}-${legendButtons.length}`}
+          >
+            <CategoryLegendBar
+              buttons={legendButtons}
+              highlighted={legendHighlighted}
+              clicked={legendClicked}
+              onHover={onLegendHover}
+              onToggle={onLegendToggle}
+              ariaLabel={legendToolbarLabel}
+            />
+          </ScrollableLegendStrip>
+        </>
       ) : null}
 
       {state.kind === 'property' && propMeta ? (
-        <div
-          className="app-prop-explore__mp-row"
-          role="group"
-          aria-label={`Rozsah: ${propMeta.label}`}
-        >
-          <span className="app-prop-explore__mp-bound" title="Dolní mez">
-            {propMeta.formatBound(state.rangeMin)}
-          </span>
-          <div className="app-prop-explore__dual app-prop-explore__dual--bar">
-            <div className="app-prop-explore__track" aria-hidden />
-            <input
-              type="range"
-              className="app-prop-explore__range app-prop-explore__range--low"
-              min={pmin}
-              max={pmax}
-              step={pstep}
-              value={state.rangeMin}
-              onChange={onLowInput}
-              aria-label={`Dolní mez: ${propMeta.label}`}
-            />
-            <input
-              type="range"
-              className="app-prop-explore__range app-prop-explore__range--high"
-              min={pmin}
-              max={pmax}
-              step={pstep}
-              value={state.rangeMax}
-              onChange={onHighInput}
-              aria-label={`Horní mez: ${propMeta.label}`}
-            />
-          </div>
-          <span className="app-prop-explore__mp-bound" title="Horní mez">
-            {propMeta.formatBound(state.rangeMax)}
-          </span>
-          <button
-            type="button"
-            className="app-prop-explore__icon-btn"
-            onClick={resetRange}
-            aria-label="Resetovat rozsah"
-            title="Reset rozsahu"
+        <>
+          <div
+            className="app-prop-explore__mp-row"
+            role="group"
+            aria-label={`Rozsah: ${propMeta.label}`}
           >
-            <svg
-              className="app-prop-explore__icon-svg"
-              viewBox="0 0 24 24"
-              width="20"
-              height="20"
-              aria-hidden
+            <span className="app-prop-explore__mp-bound" title="Dolní mez">
+              {propMeta.formatBound(state.rangeMin)}
+            </span>
+            <div className="app-prop-explore__dual app-prop-explore__dual--bar">
+              <div
+                className="app-prop-explore__track"
+                aria-hidden
+                style={
+                  propMeta.trackGradient
+                    ? { background: propMeta.trackGradient }
+                    : undefined
+                }
+              />
+              <input
+                type="range"
+                className="app-prop-explore__range app-prop-explore__range--low"
+                min={pmin}
+                max={pmax}
+                step={pstep}
+                value={state.rangeMin}
+                onChange={onLowInput}
+                aria-label={`Dolní mez: ${propMeta.label}`}
+              />
+              <input
+                type="range"
+                className="app-prop-explore__range app-prop-explore__range--high"
+                min={pmin}
+                max={pmax}
+                step={pstep}
+                value={state.rangeMax}
+                onChange={onHighInput}
+                aria-label={`Horní mez: ${propMeta.label}`}
+              />
+            </div>
+            <span className="app-prop-explore__mp-bound" title="Horní mez">
+              {propMeta.formatBound(state.rangeMax)}
+            </span>
+            <button
+              type="button"
+              className="app-prop-explore__icon-btn"
+              onClick={resetRange}
+              aria-label="Resetovat rozsah"
+              title="Reset rozsahu"
             >
-              <path
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                d="M23 4v6h-6M1 20v-6h6"
-              />
-              <path
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                d="M20.49 9A9 9 0 0 0 5.64 5.64L1 10m22 4l-4.64 4.36A9 9 0 0 1 3.51 15"
-              />
-            </svg>
-          </button>
-        </div>
+              <svg
+                className="app-prop-explore__icon-svg"
+                viewBox="0 0 24 24"
+                width="20"
+                height="20"
+                aria-hidden
+              >
+                <path
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M23 4v6h-6M1 20v-6h6"
+                />
+                <path
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M20.49 9A9 9 0 0 0 5.64 5.64L1 10m22 4l-4.64 4.36A9 9 0 0 1 3.51 15"
+                />
+              </svg>
+            </button>
+          </div>
+        </>
       ) : null}
     </div>
   )

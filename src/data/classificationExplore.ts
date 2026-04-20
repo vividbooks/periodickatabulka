@@ -6,6 +6,12 @@ import {
 } from './legendCategories'
 import { ELEMENT_BLOCK } from './elementExploreScalars.generated'
 import type { ChemicalElement } from './elements'
+import {
+  eatabilityForElement,
+  lickabilityForElement,
+  type EatabilityKey,
+  type LickabilityKey,
+} from './elementLickability'
 import { ZS_ELEMENT_CORE, type ZsStavLatky } from './zsElementCore'
 
 export type ClassificationSubtype =
@@ -13,6 +19,8 @@ export type ClassificationSubtype =
   | 'block'
   | 'metal-type'
   | 'state'
+  | 'lickability'
+  | 'eatability'
 
 export type ExploreLegendBarButton = {
   id: string
@@ -53,6 +61,18 @@ export const STATE_EXPLORE_BUTTONS: readonly ExploreLegendBarButton[] = [
   { id: 'plynná', label: 'Plynná', style: 'state-gas' },
 ]
 
+export const LICKABILITY_EXPLORE_BUTTONS: readonly ExploreLegendBarButton[] = [
+  { id: 'yes', label: 'Ano', style: 'oral-yes' },
+  { id: 'ambiguous', label: 'Sporné', style: 'oral-ambiguous' },
+  { id: 'no', label: 'Ne', style: 'oral-no' },
+]
+
+export const EATABILITY_EXPLORE_BUTTONS: readonly ExploreLegendBarButton[] = [
+  { id: 'yes', label: 'Ano', style: 'oral-yes' },
+  { id: 'ambiguous', label: 'Sporné', style: 'oral-ambiguous' },
+  { id: 'no', label: 'Ne', style: 'oral-no' },
+]
+
 export function classificationButtonsForSubtype(
   subtype: ClassificationSubtype,
 ): readonly ExploreLegendBarButton[] {
@@ -65,6 +85,10 @@ export function classificationButtonsForSubtype(
       return METAL_TYPE_EXPLORE_BUTTONS
     case 'state':
       return STATE_EXPLORE_BUTTONS
+    case 'lickability':
+      return LICKABILITY_EXPLORE_BUTTONS
+    case 'eatability':
+      return EATABILITY_EXPLORE_BUTTONS
     default:
       return CATEGORY_EXPLORE_BUTTONS
   }
@@ -88,6 +112,10 @@ export function elementMatchesExploreClassification(
       const st = ZS_ELEMENT_CORE[el.z]?.stavPriStp
       return st === (key as ZsStavLatky)
     }
+    case 'lickability':
+      return lickabilityForElement(el) === (key as LickabilityKey)
+    case 'eatability':
+      return eatabilityForElement(el) === (key as EatabilityKey)
     default:
       return true
   }

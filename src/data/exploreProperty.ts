@@ -11,6 +11,8 @@ export type PropertyExploreKey =
   | 'electron-affinity'
   | 'atomic-radius'
   | 'specific-heat'
+  | 'discovery-year'
+  | 'earth-abundance'
 
 export type ExplorePropertyState =
   | {

@@ -34,11 +34,22 @@ export function elementMatchesLegend(
 ): boolean {
   switch (key) {
     case 'kovy':
-      return category === 'transition' || category === 'post-transition'
+      return (
+        category === 'alkali-metal' ||
+        category === 'alkaline-earth' ||
+        category === 'transition' ||
+        category === 'post-transition' ||
+        category === 'lanthanide' ||
+        category === 'actinide'
+      )
     case 'polokovy':
       return category === 'metalloid'
     case 'nekovy':
-      return category === 'nonmetal'
+      return (
+        category === 'nonmetal' ||
+        category === 'halogen' ||
+        category === 'noble-gas'
+      )
     case 'alkali':
       return category === 'alkali-metal'
     case 'alkaline':
