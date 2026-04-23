@@ -476,12 +476,15 @@ function PeriodicTableInner({
                 propScalar,
                 scaleMeta.min,
                 scaleMeta.max,
+                scaleMeta.scalarPalette,
               )
             : null
         const classColors =
           exploreProperty.kind === 'classification' &&
           (exploreProperty.subtype === 'block' ||
-            exploreProperty.subtype === 'state')
+            exploreProperty.subtype === 'state' ||
+            exploreProperty.subtype === 'lickability' ||
+            exploreProperty.subtype === 'eatability')
             ? tileColorsForExploreClassification(el, exploreProperty.subtype)
             : null
         const tileOverlayColors = propColors ?? classColors

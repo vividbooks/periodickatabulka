@@ -533,6 +533,63 @@
   letter-spacing: 0.12em;
 }
 
+.inspector-card__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.inspector-card__head .inspector-card__eyebrow {
+  margin-bottom: 0;
+}
+
+.inspector-oral-status {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 5.5rem;
+  padding: 6px 10px;
+  border-radius: 999px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  border: 1px solid transparent;
+}
+
+.inspector-oral-status--yes {
+  background: rgb(20 60 34 / 0.95);
+  color: #dcfce7;
+  border-color: rgb(34 197 94 / 0.55);
+}
+
+.inspector-oral-status--ambiguous {
+  background: rgb(66 41 9 / 0.95);
+  color: #fef3c7;
+  border-color: rgb(245 158 11 / 0.55);
+}
+
+.inspector-oral-status--no {
+  background: rgb(66 16 16 / 0.95);
+  color: #fee2e2;
+  border-color: rgb(239 68 68 / 0.55);
+}
+
+.inspector-oral-status--neutral {
+  background: rgb(18 27 54 / 0.96);
+  color: #eef4ff;
+  border-color: rgb(147 197 253 / 0.38);
+}
+
+.inspector-oral-text {
+  margin: 12px 0 0;
+  font-size: clamp(0.84rem, 2.75vw, 1.02rem);
+  line-height: 1.5;
+  color: var(--text-primary);
+}
+
 .inspector-kv-list {
   list-style: none;
   margin: 0;

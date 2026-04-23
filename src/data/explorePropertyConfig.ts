@@ -1,4 +1,12 @@
 import { ELEMENTS } from './elements'
+import {
+  discoveryYearForZ,
+  formatDiscoveryYearCs,
+} from './elementDiscoveryYear'
+import {
+  earthAbundancePercentForZ,
+  formatEarthAbundancePercentCs,
+} from './elementEarthAbundance'
 import type { PropertyExploreKey } from './exploreProperty'
 import {
   MELTING_POINT_SLIDER_MAX_C,
@@ -13,6 +21,8 @@ import {
   ELEMENT_SPECIFIC_HEAT_J_PER_GK,
 } from './elementExploreScalars.generated'
 import { ZS_ELEMENT_CORE } from './zsElementCore'
+
+const PERIODIC_TABLE_DISCOVERY_YEAR = 1869
 
 function parseZsDecimal(s: string | null | undefined): number | null {
   if (s == null || s === '—' || s.trim() === '') return null
@@ -70,6 +80,12 @@ export function scalarValueForExploreProperty(
       const v = ELEMENT_SPECIFIC_HEAT_J_PER_GK[z]
       return v === undefined ? null : v
     }
+    case 'discovery-year': {
+      const year = discoveryYearForZ(z)
+      return year == null ? null : Math.max(PERIODIC_TABLE_DISCOVERY_YEAR, year)
+    }
+    case 'earth-abundance':
+      return earthAbundancePercentForZ(z)
     default:
       return null
   }
@@ -82,6 +98,8 @@ export type PropertyScaleMeta = {
   label: string
   unit: string
   formatBound: (n: number) => string
+  trackGradient?: string
+  scalarPalette?: 'rainbow' | 'grayscale'
 }
 
 const boilingExtent = extentFrom((z) => {
@@ -110,6 +128,17 @@ const densityExtent = extentFrom((z) =>
 const chiExtent = extentFrom((z) =>
   parseZsDecimal(ZS_ELEMENT_CORE[z]?.elektronegativita ?? null),
 )
+const discoveryYears = ELEMENTS.map(({ z }) => discoveryYearForZ(z)).filter(
+  (v): v is number => v != null,
+)
+const discoveryYearExtent = {
+  min: PERIODIC_TABLE_DISCOVERY_YEAR,
+  max: Math.max(...discoveryYears),
+}
+const earthAbundanceExtent = {
+  min: 0,
+  max: Math.max(...ELEMENTS.map(({ z }) => earthAbundancePercentForZ(z) ?? 0)),
+}
 
 function fmtIntCs(n: number): string {
   return new Intl.NumberFormat('cs-CZ', { maximumFractionDigits: 0 }).format(
@@ -188,6 +217,27 @@ export const PROPERTY_SCALE: Record<PropertyExploreKey, PropertyScaleMeta> = {
     label: 'Měrná tepelná kapacita',
     unit: 'J/(g·°C)',
     formatBound: (n) => `${fmt2Cs(n)} J/(g·°C)`,
+  },
+  'discovery-year': {
+    min: Math.trunc(discoveryYearExtent.min),
+    max: Math.trunc(discoveryYearExtent.max),
+    step: 1,
+    label: 'Časový vývoj',
+    unit: 'rok objevu',
+    formatBound: (n) => formatDiscoveryYearCs(n),
+    trackGradient: 'linear-gradient(90deg, #05070d 0%, #ffffff 100%)',
+    scalarPalette: 'grayscale',
+  },
+  'earth-abundance': {
+    min: earthAbundanceExtent.min,
+    max: earthAbundanceExtent.max,
+    step: 0.000001,
+    label: 'Zastoupení % na Zemi',
+    unit: '% hmotnosti Země',
+    formatBound: (n) => formatEarthAbundancePercentCs(n),
+    trackGradient:
+      'linear-gradient(90deg, hsl(235 72% 34%) 0%, hsl(180 72% 42%) 30%, hsl(90 78% 46%) 62%, hsl(12 82% 49%) 100%)',
+    scalarPalette: 'rainbow',
   },
 }
 

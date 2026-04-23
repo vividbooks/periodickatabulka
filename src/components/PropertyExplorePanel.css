@@ -135,6 +135,19 @@
   min-width: min(100%, 280px);
 }
 
+.app-prop-explore__note {
+  flex: 0 0 100%;
+  width: 100%;
+  margin: -2px 0 0;
+  font-size: 0.72rem;
+  line-height: 1.35;
+  color: rgb(219 234 254 / 0.9);
+}
+
+.app-prop-explore__note strong {
+  color: #ffffff;
+}
+
 .app-prop-explore__mp-bound {
   font-size: 0.68rem;
   font-variant-numeric: tabular-nums;
@@ -377,5 +390,9 @@
     min-height: 44px;
     width: 44px;
     height: 44px;
+  }
+
+  .app-prop-explore__note {
+    font-size: 0.78rem;
   }
 }

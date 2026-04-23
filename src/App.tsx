@@ -33,6 +33,15 @@ import {
   zsPraktickaPoznamka,
   zsValencePopis,
 } from './data/zsChemNarativ'
+import {
+  oralSafetyProfileForElement,
+  oralSafetyStatusLabelCs,
+} from './data/elementLickability'
+import {
+  earthAbundanceNoteForElement,
+  earthAbundancePercentForZ,
+  formatEarthAbundancePercentCs,
+} from './data/elementEarthAbundance'
 import { vividbooksKnowledgeIdsForElement } from './data/vividbooksLessonsForElement'
 import {
   DEFAULT_EXPLORE_PROPERTY_STATE,
@@ -796,6 +805,9 @@ const ZsInspectorPanel = memo(function ZsInspectorPanel({
     const c = ZS_ELEMENT_CORE[element.z]
     const sh = SHELL_ELECTRONS_BY_ATOMIC_NUMBER[element.z]
     if (!c || !sh) return null
+    const oralSafety = oralSafetyProfileForElement(element)
+    const earthAbundance = earthAbundancePercentForZ(element.z) ?? 0
+    const earthAbundanceNote = earthAbundanceNoteForElement(element)
     const en = c.elektronegativita
     const rho = c.hustota
     const blok = zsElectronBlockLetter(element)
@@ -921,6 +933,18 @@ const ZsInspectorPanel = memo(function ZsInspectorPanel({
             ) : null}
           </section>
 
+          <section className="inspector-card" aria-label="Zastoupení na Zemi">
+            <div className="inspector-card__head">
+              <h4 className="inspector-card__eyebrow">Zastoupení na Zemi</h4>
+              <span className="inspector-oral-status inspector-oral-status--neutral">
+                {formatEarthAbundancePercentCs(earthAbundance)}
+              </span>
+            </div>
+            <p className="inspector-oral-text">
+              Bulk podíl celé Země. {earthAbundanceNote}
+            </p>
+          </section>
+
           <section
             className="inspector-card inspector-card--tip"
             aria-label="Praktická poznámka"
@@ -929,6 +953,36 @@ const ZsInspectorPanel = memo(function ZsInspectorPanel({
               Tip pro výuku
             </h4>
             <p className="inspector-tip-text">{zsPraktickaPoznamka(c)}</p>
+          </section>
+
+          <section className="inspector-card" aria-label="Můžu to olíznout">
+            <div className="inspector-card__head">
+              <h4 className="inspector-card__eyebrow">Můžu to olíznout?</h4>
+              <span
+                className={[
+                  'inspector-oral-status',
+                  `inspector-oral-status--${oralSafety.lick.status}`,
+                ].join(' ')}
+              >
+                {oralSafetyStatusLabelCs(oralSafety.lick.status)}
+              </span>
+            </div>
+            <p className="inspector-oral-text">{oralSafety.lick.text}</p>
+          </section>
+
+          <section className="inspector-card" aria-label="Můžu to sníst">
+            <div className="inspector-card__head">
+              <h4 className="inspector-card__eyebrow">Můžu to sníst?</h4>
+              <span
+                className={[
+                  'inspector-oral-status',
+                  `inspector-oral-status--${oralSafety.eat.status}`,
+                ].join(' ')}
+              >
+                {oralSafetyStatusLabelCs(oralSafety.eat.status)}
+              </span>
+            </div>
+            <p className="inspector-oral-text">{oralSafety.eat.text}</p>
           </section>
       </div>
     )
