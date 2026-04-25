@@ -34,7 +34,7 @@ function categorySentence(cat: ElementCategory): string {
 const COMPACT_GROUP_HINT: Record<number, string> = {
   1: 'Skupina 1 (IUPAC) — alkalické kovy; vodík je chemicky výjimka.',
   2: 'Skupina 2 — kovy alkalických zemin.',
-  3: 'Skupina 3 — začátek d-bloku (Sc, Y, La/Ac …).',
+  3: 'Skupina 3 — začátek d-bloku; u La/Ac vs. Lu/Lr se různé tabulky liší.',
   4: 'Skupina 4 — přechodné kovy (Ti, Zr, Hf …).',
   5: 'Skupina 5 — přechodné kovy (V, Nb, Ta …).',
   6: 'Skupina 6 — přechodné kovy (Cr, Mo, W …).',

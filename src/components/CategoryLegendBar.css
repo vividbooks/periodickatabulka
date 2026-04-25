@@ -53,12 +53,6 @@
   transform: scale(0.97);
 }
 
-.app-legend-halogen-mark {
-  margin-right: 4px;
-  color: #42a5f5;
-  font-weight: 700;
-}
-
 /* --- Varianty tlačítek (blízko mocku) --- */
 
 .app-legend-btn--kovy {

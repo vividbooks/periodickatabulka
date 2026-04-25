@@ -1,8 +1,8 @@
 /**
  * Tabulkové údaje pro výklad chemie na ZŠ.
  * Zdroj dat: převážně Wikipedia „Electronegativities of the elements (data page)“ (WEL)
- * a Bowserinator/Periodic-Table-JSON; χ u He, Ne, Ar na Paulingově škáli oficiálně nebývá
- * (ponecháno null → v aplikaci „—“). U 104–118 jsou χ odhady podle homologů / literatury.
+ * a Bowserinator/Periodic-Table-JSON; χ u řady vzácných plynů a supertěžkých prvků
+ * nebývá spolehlivě určena (ponecháno null → v aplikaci „—“).
  */
 
 export type ZsStavLatky = 'pevná' | 'kapalná' | 'plynná'
@@ -18,7 +18,7 @@ export interface ZsElementCoreFacts {
   typLatkyZs: string
   /** Elektronegativita (Pauling), pokud je ve zdrojích; u He, Ne, Ar typicky není definována. */
   elektronegativita: string | null
-  /** Hustota u pevných/kapalných látek (g/cm³), plyny často bez údaje. */
+  /** Hustota v g/cm³; u plynů tedy velmi malá čísla. */
   hustota: string | null
 }
 
@@ -32,7 +32,7 @@ export const ZS_ELEMENT_CORE: Record<number, ZsElementCoreFacts> = {
     stavPriStp: 'plynná',
     typLatkyZs: "nekov",
     elektronegativita: "2,2",
-    hustota: "0,08988",
+    hustota: "0,00008988",
   },
   2: {
     z: 2,
@@ -43,7 +43,7 @@ export const ZS_ELEMENT_CORE: Record<number, ZsElementCoreFacts> = {
     stavPriStp: 'plynná',
     typLatkyZs: "vzácný plyn",
     elektronegativita: null,
-    hustota: "0,1786",
+    hustota: "0,0001786",
   },
   3: {
     z: 3,
@@ -98,7 +98,7 @@ export const ZS_ELEMENT_CORE: Record<number, ZsElementCoreFacts> = {
     stavPriStp: 'plynná',
     typLatkyZs: "nekov",
     elektronegativita: "3,04",
-    hustota: "1,251",
+    hustota: "0,001251",
   },
   8: {
     z: 8,
@@ -109,7 +109,7 @@ export const ZS_ELEMENT_CORE: Record<number, ZsElementCoreFacts> = {
     stavPriStp: 'plynná',
     typLatkyZs: "nekov",
     elektronegativita: "3,44",
-    hustota: "1,429",
+    hustota: "0,001429",
   },
   9: {
     z: 9,
@@ -120,7 +120,7 @@ export const ZS_ELEMENT_CORE: Record<number, ZsElementCoreFacts> = {
     stavPriStp: 'plynná',
     typLatkyZs: "nekov",
     elektronegativita: "3,98",
-    hustota: "1,696",
+    hustota: "0,001696",
   },
   10: {
     z: 10,
@@ -131,7 +131,7 @@ export const ZS_ELEMENT_CORE: Record<number, ZsElementCoreFacts> = {
     stavPriStp: 'plynná',
     typLatkyZs: "vzácný plyn",
     elektronegativita: null,
-    hustota: "0,9002",
+    hustota: "0,0009002",
   },
   11: {
     z: 11,
@@ -208,7 +208,7 @@ export const ZS_ELEMENT_CORE: Record<number, ZsElementCoreFacts> = {
     stavPriStp: 'plynná',
     typLatkyZs: "nekov",
     elektronegativita: "3,16",
-    hustota: "3,2",
+    hustota: "0,0032",
   },
   18: {
     z: 18,
@@ -219,7 +219,7 @@ export const ZS_ELEMENT_CORE: Record<number, ZsElementCoreFacts> = {
     stavPriStp: 'plynná',
     typLatkyZs: "vzácný plyn",
     elektronegativita: null,
-    hustota: "1,784",
+    hustota: "0,001784",
   },
   19: {
     z: 19,
@@ -416,8 +416,8 @@ export const ZS_ELEMENT_CORE: Record<number, ZsElementCoreFacts> = {
     skupinaPopis: "18 (hlavní skupina p-bloku)",
     stavPriStp: 'plynná',
     typLatkyZs: "vzácný plyn",
-    elektronegativita: "3",
-    hustota: "3,749",
+    elektronegativita: null,
+    hustota: "0,003425",
   },
   37: {
     z: 37,
@@ -615,7 +615,7 @@ export const ZS_ELEMENT_CORE: Record<number, ZsElementCoreFacts> = {
     stavPriStp: 'plynná',
     typLatkyZs: "vzácný plyn",
     elektronegativita: "2,6",
-    hustota: "5,894",
+    hustota: "0,005366",
   },
   55: {
     z: 55,
@@ -956,7 +956,7 @@ export const ZS_ELEMENT_CORE: Record<number, ZsElementCoreFacts> = {
     stavPriStp: 'pevná',
     typLatkyZs: "polokov",
     elektronegativita: "2,2",
-    hustota: "6,35",
+    hustota: null,
   },
   86: {
     z: 86,
@@ -966,8 +966,8 @@ export const ZS_ELEMENT_CORE: Record<number, ZsElementCoreFacts> = {
     skupinaPopis: "18 (hlavní skupina p-bloku)",
     stavPriStp: 'plynná',
     typLatkyZs: "vzácný plyn",
-    elektronegativita: "2,2",
-    hustota: "9,73",
+    elektronegativita: null,
+    hustota: "0,009074",
   },
   87: {
     z: 87,
@@ -978,7 +978,7 @@ export const ZS_ELEMENT_CORE: Record<number, ZsElementCoreFacts> = {
     stavPriStp: 'pevná',
     typLatkyZs: "alkalický kov",
     elektronegativita: "0,79",
-    hustota: "1,87",
+    hustota: null,
   },
   88: {
     z: 88,
@@ -1147,14 +1147,14 @@ export const ZS_ELEMENT_CORE: Record<number, ZsElementCoreFacts> = {
   },
   103: {
     z: 103,
-    ar: "266",
+    ar: "262",
     perioda: 7,
     skupina: 3,
     skupinaPopis: "3 (vedlejší skupina, přechodné kovy)",
     stavPriStp: 'pevná',
     typLatkyZs: "aktinoid (radioaktivita u těžších prvků)",
-    elektronegativita: "1,3",
-    hustota: "14,4",
+    elektronegativita: null,
+    hustota: null,
   },
   104: {
     z: 104,
@@ -1164,8 +1164,8 @@ export const ZS_ELEMENT_CORE: Record<number, ZsElementCoreFacts> = {
     skupinaPopis: "4 (vedlejší skupina, přechodné kovy)",
     stavPriStp: 'pevná',
     typLatkyZs: "přechodný kov",
-    elektronegativita: "1,3",
-    hustota: "23,2",
+    elektronegativita: null,
+    hustota: null,
   },
   105: {
     z: 105,
@@ -1175,8 +1175,8 @@ export const ZS_ELEMENT_CORE: Record<number, ZsElementCoreFacts> = {
     skupinaPopis: "5 (vedlejší skupina, přechodné kovy)",
     stavPriStp: 'pevná',
     typLatkyZs: "přechodný kov",
-    elektronegativita: "1,4",
-    hustota: "29,3",
+    elektronegativita: null,
+    hustota: null,
   },
   106: {
     z: 106,
@@ -1186,8 +1186,8 @@ export const ZS_ELEMENT_CORE: Record<number, ZsElementCoreFacts> = {
     skupinaPopis: "6 (vedlejší skupina, přechodné kovy)",
     stavPriStp: 'pevná',
     typLatkyZs: "přechodný kov",
-    elektronegativita: "1,4",
-    hustota: "35",
+    elektronegativita: null,
+    hustota: null,
   },
   107: {
     z: 107,
@@ -1197,8 +1197,8 @@ export const ZS_ELEMENT_CORE: Record<number, ZsElementCoreFacts> = {
     skupinaPopis: "7 (vedlejší skupina, přechodné kovy)",
     stavPriStp: 'pevná',
     typLatkyZs: "přechodný kov",
-    elektronegativita: "1,5",
-    hustota: "37,1",
+    elektronegativita: null,
+    hustota: null,
   },
   108: {
     z: 108,
@@ -1208,8 +1208,8 @@ export const ZS_ELEMENT_CORE: Record<number, ZsElementCoreFacts> = {
     skupinaPopis: "8 (vedlejší skupina, přechodné kovy)",
     stavPriStp: 'pevná',
     typLatkyZs: "přechodný kov",
-    elektronegativita: "1,5",
-    hustota: "40,7",
+    elektronegativita: null,
+    hustota: null,
   },
   109: {
     z: 109,
@@ -1219,8 +1219,8 @@ export const ZS_ELEMENT_CORE: Record<number, ZsElementCoreFacts> = {
     skupinaPopis: "9 (vedlejší skupina, přechodné kovy)",
     stavPriStp: 'pevná',
     typLatkyZs: "přechodný kov",
-    elektronegativita: "1,6",
-    hustota: "37,4",
+    elektronegativita: null,
+    hustota: null,
   },
   110: {
     z: 110,
@@ -1230,8 +1230,8 @@ export const ZS_ELEMENT_CORE: Record<number, ZsElementCoreFacts> = {
     skupinaPopis: "10 (vedlejší skupina, přechodné kovy)",
     stavPriStp: 'pevná',
     typLatkyZs: "přechodný kov",
-    elektronegativita: "1,6",
-    hustota: "34,8",
+    elektronegativita: null,
+    hustota: null,
   },
   111: {
     z: 111,
@@ -1241,8 +1241,8 @@ export const ZS_ELEMENT_CORE: Record<number, ZsElementCoreFacts> = {
     skupinaPopis: "11 (vedlejší skupina, přechodné kovy)",
     stavPriStp: 'pevná',
     typLatkyZs: "přechodný kov",
-    elektronegativita: "1,7",
-    hustota: "28,7",
+    elektronegativita: null,
+    hustota: null,
   },
   112: {
     z: 112,
@@ -1250,10 +1250,10 @@ export const ZS_ELEMENT_CORE: Record<number, ZsElementCoreFacts> = {
     perioda: 7,
     skupina: 12,
     skupinaPopis: "12 (vedlejší skupina, přechodné kovy)",
-    stavPriStp: 'kapalná',
+    stavPriStp: 'pevná',
     typLatkyZs: "přechodný kov",
-    elektronegativita: "1,7",
-    hustota: "14",
+    elektronegativita: null,
+    hustota: null,
   },
   113: {
     z: 113,
@@ -1263,8 +1263,8 @@ export const ZS_ELEMENT_CORE: Record<number, ZsElementCoreFacts> = {
     skupinaPopis: "13 (hlavní skupina p-bloku)",
     stavPriStp: 'pevná',
     typLatkyZs: "kov p-bloku",
-    elektronegativita: "1,8",
-    hustota: "16",
+    elektronegativita: null,
+    hustota: null,
   },
   114: {
     z: 114,
@@ -1274,8 +1274,8 @@ export const ZS_ELEMENT_CORE: Record<number, ZsElementCoreFacts> = {
     skupinaPopis: "14 (hlavní skupina p-bloku)",
     stavPriStp: 'pevná',
     typLatkyZs: "kov p-bloku",
-    elektronegativita: "1,8",
-    hustota: "14",
+    elektronegativita: null,
+    hustota: null,
   },
   115: {
     z: 115,
@@ -1285,8 +1285,8 @@ export const ZS_ELEMENT_CORE: Record<number, ZsElementCoreFacts> = {
     skupinaPopis: "15 (hlavní skupina p-bloku)",
     stavPriStp: 'pevná',
     typLatkyZs: "kov p-bloku",
-    elektronegativita: "1,9",
-    hustota: "13,5",
+    elektronegativita: null,
+    hustota: null,
   },
   116: {
     z: 116,
@@ -1296,8 +1296,8 @@ export const ZS_ELEMENT_CORE: Record<number, ZsElementCoreFacts> = {
     skupinaPopis: "16 (hlavní skupina p-bloku)",
     stavPriStp: 'pevná',
     typLatkyZs: "kov p-bloku",
-    elektronegativita: "1,9",
-    hustota: "12,9",
+    elektronegativita: null,
+    hustota: null,
   },
   117: {
     z: 117,
@@ -1306,9 +1306,9 @@ export const ZS_ELEMENT_CORE: Record<number, ZsElementCoreFacts> = {
     skupina: 17,
     skupinaPopis: "17 (hlavní skupina p-bloku)",
     stavPriStp: 'pevná',
-    typLatkyZs: "polokov",
-    elektronegativita: "2,0",
-    hustota: "7,17",
+    typLatkyZs: "supertěžký prvek skupiny 17",
+    elektronegativita: null,
+    hustota: null,
   },
   118: {
     z: 118,
@@ -1317,8 +1317,8 @@ export const ZS_ELEMENT_CORE: Record<number, ZsElementCoreFacts> = {
     skupina: 18,
     skupinaPopis: "18 (hlavní skupina p-bloku)",
     stavPriStp: 'pevná',
-    typLatkyZs: "vzácný plyn",
-    elektronegativita: "2,0",
-    hustota: "4,95",
+    typLatkyZs: "supertěžký radioaktivní prvek",
+    elektronegativita: null,
+    hustota: null,
   },
 }

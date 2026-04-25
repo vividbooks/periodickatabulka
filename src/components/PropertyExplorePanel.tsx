@@ -208,7 +208,7 @@ export const PropertyExplorePanel = memo(function PropertyExplorePanel({
       case 'category':
         return 'Kategorie prvků'
       case 'block':
-        return 'Blok (s, p, d, f)'
+        return 's, p, d, f-prvky'
       case 'metal-type':
         return 'Typ kovu / nekovu'
       case 'state':
@@ -247,6 +247,7 @@ export const PropertyExplorePanel = memo(function PropertyExplorePanel({
   const pmin = propMeta?.min ?? 0
   const pmax = propMeta?.max ?? 1
   const pstep = propMeta?.step ?? 1
+  const isSingleSlider = propMeta?.selectionMode === 'max-only'
 
   const onLowInput = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -266,6 +267,15 @@ export const PropertyExplorePanel = memo(function PropertyExplorePanel({
       let nl = state.rangeMin
       if (nh < nl) nl = nh
       onChange({ ...state, rangeMin: nl, rangeMax: nh })
+    },
+    [onChange, state, pmin, pmax],
+  )
+
+  const onSingleInput = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      if (state.kind !== 'property') return
+      const value = Math.max(pmin, Math.min(pmax, Number(e.target.value)))
+      onChange({ ...state, rangeMin: pmin, rangeMax: value })
     },
     [onChange, state, pmin, pmax],
   )
@@ -295,7 +305,7 @@ export const PropertyExplorePanel = memo(function PropertyExplorePanel({
         >
           <optgroup label="Klasifikace">
             <option value="c:category">Skupiny (kategorie)</option>
-            <option value="c:block">Blok</option>
+            <option value="c:block">s, p, d, f-prvky</option>
             <option value="c:metal-type">Typ kovu</option>
             <option value="c:state">Skupenství</option>
           </optgroup>
@@ -311,7 +321,7 @@ export const PropertyExplorePanel = memo(function PropertyExplorePanel({
             <option value="p:density">Hustota (g/cm³)</option>
             <option value="p:electronegativity">Elektronegativita</option>
             <option value="p:ionization">1. ionizace (kJ/mol)</option>
-            <option value="p:electron-affinity">Afinita elektronu (kJ/mol)</option>
+            <option value="p:electron-affinity">Elektronová afinita (kJ/mol)</option>
             <option value="p:atomic-radius">Atomový poloměr (pm)</option>
             <option value="p:specific-heat">Měrná tep. kapacita (J/(g·°C))</option>
           </optgroup>
@@ -338,12 +348,27 @@ export const PropertyExplorePanel = memo(function PropertyExplorePanel({
       {state.kind === 'property' && propMeta ? (
         <>
           <div
-            className="app-prop-explore__mp-row"
+            className={[
+              'app-prop-explore__mp-row',
+              isSingleSlider ? 'app-prop-explore__mp-row--single' : '',
+            ]
+              .filter(Boolean)
+              .join(' ')}
             role="group"
             aria-label={`Rozsah: ${propMeta.label}`}
           >
-            <span className="app-prop-explore__mp-bound" title="Dolní mez">
-              {propMeta.formatBound(state.rangeMin)}
+            <span
+              className={[
+                'app-prop-explore__mp-bound',
+                isSingleSlider ? 'app-prop-explore__mp-bound--current' : '',
+              ]
+                .filter(Boolean)
+                .join(' ')}
+              title={isSingleSlider ? 'Vybraný rok' : 'Dolní mez'}
+            >
+              {propMeta.formatBound(
+                isSingleSlider ? state.rangeMax : state.rangeMin,
+              )}
             </span>
             <div className="app-prop-explore__dual app-prop-explore__dual--bar">
               <div
@@ -355,30 +380,47 @@ export const PropertyExplorePanel = memo(function PropertyExplorePanel({
                     : undefined
                 }
               />
-              <input
-                type="range"
-                className="app-prop-explore__range app-prop-explore__range--low"
-                min={pmin}
-                max={pmax}
-                step={pstep}
-                value={state.rangeMin}
-                onChange={onLowInput}
-                aria-label={`Dolní mez: ${propMeta.label}`}
-              />
-              <input
-                type="range"
-                className="app-prop-explore__range app-prop-explore__range--high"
-                min={pmin}
-                max={pmax}
-                step={pstep}
-                value={state.rangeMax}
-                onChange={onHighInput}
-                aria-label={`Horní mez: ${propMeta.label}`}
-              />
+              {isSingleSlider ? (
+                <input
+                  type="range"
+                  className="app-prop-explore__range app-prop-explore__range--high"
+                  min={pmin}
+                  max={pmax}
+                  step={pstep}
+                  value={state.rangeMax}
+                  onChange={onSingleInput}
+                  aria-label={`Rok: ${propMeta.label}`}
+                />
+              ) : (
+                <>
+                  <input
+                    type="range"
+                    className="app-prop-explore__range app-prop-explore__range--low"
+                    min={pmin}
+                    max={pmax}
+                    step={pstep}
+                    value={state.rangeMin}
+                    onChange={onLowInput}
+                    aria-label={`Dolní mez: ${propMeta.label}`}
+                  />
+                  <input
+                    type="range"
+                    className="app-prop-explore__range app-prop-explore__range--high"
+                    min={pmin}
+                    max={pmax}
+                    step={pstep}
+                    value={state.rangeMax}
+                    onChange={onHighInput}
+                    aria-label={`Horní mez: ${propMeta.label}`}
+                  />
+                </>
+              )}
             </div>
-            <span className="app-prop-explore__mp-bound" title="Horní mez">
-              {propMeta.formatBound(state.rangeMax)}
-            </span>
+            {!isSingleSlider ? (
+              <span className="app-prop-explore__mp-bound" title="Horní mez">
+                {propMeta.formatBound(state.rangeMax)}
+              </span>
+            ) : null}
             <button
               type="button"
               className="app-prop-explore__icon-btn"

@@ -31,7 +31,10 @@ import {
   PROPERTY_SCALE,
   scalarValueForExploreProperty,
 } from '../data/explorePropertyConfig'
-import { tileColorsForExploreScalar } from '../data/tileColorsForExploreScalar'
+import {
+  tileColorsForExploreScalar,
+  tileColorsForThresholdGrayscale,
+} from '../data/tileColorsForExploreScalar'
 import { ZS_ELEMENT_CORE } from '../data/zsElementCore'
 import { PT_MARKER_TITLES, PtMarkerSvg, PtTileMarkers } from './PtTileMarkers'
 import './PeriodicTable.css'
@@ -449,8 +452,10 @@ function PeriodicTableInner({
         let propOutside = false
         if (exploreProperty.kind === 'property' && propScalar != null) {
           propOutside =
-            propScalar < exploreProperty.rangeMin ||
-            propScalar > exploreProperty.rangeMax
+            exploreProperty.property === 'discovery-year'
+              ? propScalar > exploreProperty.rangeMax
+              : propScalar < exploreProperty.rangeMin ||
+                propScalar > exploreProperty.rangeMax
         }
         const faded =
           (selectedZ != null && !selected) ||
@@ -472,12 +477,17 @@ function PeriodicTableInner({
             : null
         const propColors =
           scaleMeta != null
-            ? tileColorsForExploreScalar(
-                propScalar,
-                scaleMeta.min,
-                scaleMeta.max,
-                scaleMeta.scalarPalette,
-              )
+            ? exploreProperty.kind === 'property' &&
+              exploreProperty.property === 'discovery-year'
+              ? tileColorsForThresholdGrayscale(
+                  propScalar != null && propScalar <= exploreProperty.rangeMax,
+                )
+              : tileColorsForExploreScalar(
+                  propScalar,
+                  scaleMeta.min,
+                  scaleMeta.max,
+                  scaleMeta.scalarPalette,
+                )
             : null
         const classColors =
           exploreProperty.kind === 'classification' &&
@@ -623,6 +633,12 @@ function PeriodicTableInner({
   const rowHeads = Array.from({ length: gridRows }, (_, i) =>
     periodLabelForGridRow(i + 1, layoutMode),
   )
+  const canvasSafetyNotice =
+    exploreProperty.kind === 'classification' &&
+    (exploreProperty.subtype === 'lickability' ||
+      exploreProperty.subtype === 'eatability')
+      ? 'V chemii se ve třídě ani v laboratoři žádné prvky nejí ani neolizují. Je to nebezpečné. Tento přehled je jen orientační vysvětlení chemických vlastností.'
+      : null
 
   const rootStyle: CSSProperties | undefined =
     selectedZ != null
@@ -897,6 +913,11 @@ function PeriodicTableInner({
             </div>
           </div>
         </div>
+        {canvasSafetyNotice ? (
+          <div className="pt-safety-banner" role="note" aria-live="polite">
+            <span className="pt-safety-banner__text">{canvasSafetyNotice}</span>
+          </div>
+        ) : null}
       </div>
       {axisCaption ? (
         <div className="pt-axis-caption" role="status" aria-live="polite">

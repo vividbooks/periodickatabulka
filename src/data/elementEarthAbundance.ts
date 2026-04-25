@@ -107,30 +107,30 @@ const EARTH_ABUNDANCE: Partial<Record<number, EarthAbundanceEntry>> = {
   92: { percent: 0.000002, note: 'Ultra-stopově v rudách, ale klíčový pro radioaktivní teplo a jadernou energetiku.' },
   93: { percent: 0, note: 'Jen stopově jako produkt rozpadu a v jaderných reakcích.' },
   94: { percent: 0, note: 'V přírodě jen mikroskopické stopy z rozpadových procesů.' },
-  95: { percent: 0, note: 'Čistě umělý prvek; přirozeně na Zemi 0 %.' },
-  96: { percent: 0, note: 'Čistě umělý prvek; přirozeně na Zemi 0 %.' },
-  97: { percent: 0, note: 'Čistě umělý prvek; přirozeně na Zemi 0 %.' },
-  98: { percent: 0, note: 'Čistě umělý prvek; přirozeně na Zemi 0 %.' },
-  99: { percent: 0, note: 'Čistě umělý prvek; přirozeně na Zemi 0 %.' },
-  100: { percent: 0, note: 'Čistě umělý prvek; přirozeně na Zemi 0 %.' },
-  101: { percent: 0, note: 'Čistě umělý prvek; přirozeně na Zemi 0 %.' },
-  102: { percent: 0, note: 'Čistě umělý prvek; přirozeně na Zemi 0 %.' },
-  103: { percent: 0, note: 'Čistě umělý prvek; přirozeně na Zemi 0 %.' },
-  104: { percent: 0, note: 'Čistě umělý prvek; přirozeně na Zemi 0 %.' },
-  105: { percent: 0, note: 'Čistě umělý prvek; přirozeně na Zemi 0 %.' },
-  106: { percent: 0, note: 'Čistě umělý prvek; přirozeně na Zemi 0 %.' },
-  107: { percent: 0, note: 'Čistě umělý prvek; přirozeně na Zemi 0 %.' },
-  108: { percent: 0, note: 'Čistě umělý prvek; přirozeně na Zemi 0 %.' },
-  109: { percent: 0, note: 'Čistě umělý prvek; přirozeně na Zemi 0 %.' },
-  110: { percent: 0, note: 'Čistě umělý prvek; přirozeně na Zemi 0 %.' },
-  111: { percent: 0, note: 'Čistě umělý prvek; přirozeně na Zemi 0 %.' },
-  112: { percent: 0, note: 'Čistě umělý prvek; přirozeně na Zemi 0 %.' },
-  113: { percent: 0, note: 'Čistě umělý prvek; přirozeně na Zemi 0 %.' },
-  114: { percent: 0, note: 'Čistě umělý prvek; přirozeně na Zemi 0 %.' },
-  115: { percent: 0, note: 'Čistě umělý prvek; přirozeně na Zemi 0 %.' },
-  116: { percent: 0, note: 'Čistě umělý prvek; přirozeně na Zemi 0 %.' },
-  117: { percent: 0, note: 'Čistě umělý prvek; přirozeně na Zemi 0 %.' },
-  118: { percent: 0, note: 'Čistě umělý prvek; přirozeně na Zemi 0 %.' },
+  95: { percent: 0, note: 'V měřítku celé Země prakticky nulové množství; hlavně laboratorní/jaderný původ.' },
+  96: { percent: 0, note: 'V měřítku celé Země prakticky nulové množství; hlavně laboratorní/jaderný původ.' },
+  97: { percent: 0, note: 'V měřítku celé Země prakticky nulové množství; hlavně laboratorní/jaderný původ.' },
+  98: { percent: 0, note: 'V měřítku celé Země prakticky nulové množství; hlavně laboratorní/jaderný původ.' },
+  99: { percent: 0, note: 'V měřítku celé Země prakticky nulové množství; hlavně laboratorní/jaderný původ.' },
+  100: { percent: 0, note: 'V měřítku celé Země prakticky nulové množství; hlavně laboratorní/jaderný původ.' },
+  101: { percent: 0, note: 'V měřítku celé Země prakticky nulové množství; hlavně laboratorní/jaderný původ.' },
+  102: { percent: 0, note: 'V měřítku celé Země prakticky nulové množství; hlavně laboratorní/jaderný původ.' },
+  103: { percent: 0, note: 'V měřítku celé Země prakticky nulové množství; hlavně laboratorní/jaderný původ.' },
+  104: { percent: 0, note: 'Syntetický supertěžký prvek; v přirozené Zemi nemá měřitelné zastoupení.' },
+  105: { percent: 0, note: 'Syntetický supertěžký prvek; v přirozené Zemi nemá měřitelné zastoupení.' },
+  106: { percent: 0, note: 'Syntetický supertěžký prvek; v přirozené Zemi nemá měřitelné zastoupení.' },
+  107: { percent: 0, note: 'Syntetický supertěžký prvek; v přirozené Zemi nemá měřitelné zastoupení.' },
+  108: { percent: 0, note: 'Syntetický supertěžký prvek; v přirozené Zemi nemá měřitelné zastoupení.' },
+  109: { percent: 0, note: 'Syntetický supertěžký prvek; v přirozené Zemi nemá měřitelné zastoupení.' },
+  110: { percent: 0, note: 'Syntetický supertěžký prvek; v přirozené Zemi nemá měřitelné zastoupení.' },
+  111: { percent: 0, note: 'Syntetický supertěžký prvek; v přirozené Zemi nemá měřitelné zastoupení.' },
+  112: { percent: 0, note: 'Syntetický supertěžký prvek; v přirozené Zemi nemá měřitelné zastoupení.' },
+  113: { percent: 0, note: 'Syntetický supertěžký prvek; v přirozené Zemi nemá měřitelné zastoupení.' },
+  114: { percent: 0, note: 'Syntetický supertěžký prvek; v přirozené Zemi nemá měřitelné zastoupení.' },
+  115: { percent: 0, note: 'Syntetický supertěžký prvek; v přirozené Zemi nemá měřitelné zastoupení.' },
+  116: { percent: 0, note: 'Syntetický supertěžký prvek; v přirozené Zemi nemá měřitelné zastoupení.' },
+  117: { percent: 0, note: 'Syntetický supertěžký prvek; v přirozené Zemi nemá měřitelné zastoupení.' },
+  118: { percent: 0, note: 'Syntetický supertěžký prvek; v přirozené Zemi nemá měřitelné zastoupení.' },
 }
 
 export function earthAbundancePercentForZ(z: number): EarthAbundancePercent {
@@ -146,15 +146,8 @@ export function earthAbundanceNoteForElement(
 }
 
 export function formatEarthAbundancePercentCs(n: number): string {
-  if (!Number.isFinite(n) || n <= 0) return '0 %'
-  if (n >= 1) {
-    return `${new Intl.NumberFormat('cs-CZ', {
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 2,
-    }).format(n)} %`
-  }
   return `${new Intl.NumberFormat('cs-CZ', {
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 8,
-  }).format(n)} %`
+    minimumFractionDigits: 1,
+    maximumFractionDigits: 1,
+  }).format(Number.isFinite(n) && n > 0 ? n : 0)} %`
 }

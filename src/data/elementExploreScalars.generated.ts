@@ -104,7 +104,7 @@ export const ELEMENT_BOILING_POINT_C: Record<number, number | null> = {
   "101": null,
   "102": null,
   "103": null,
-  "104": 5526.85,
+  "104": null,
   "105": null,
   "106": null,
   "107": null,
@@ -112,14 +112,13 @@ export const ELEMENT_BOILING_POINT_C: Record<number, number | null> = {
   "109": null,
   "110": null,
   "111": null,
-  "112": 3296.85,
-  "113": 1156.85,
-  "114": 146.85000000000002,
-  "115": 1126.85,
-  "116": 811.85,
-  "117": 609.85,
-  "118": 76.85000000000002,
-  "119": 356.85
+  "112": null,
+  "113": null,
+  "114": null,
+  "115": null,
+  "116": null,
+  "117": null,
+  "118": null
 }
 export const ELEMENT_FIRST_IONIZATION_KJ: Record<number, number | null> = {
   "1": 1312,
@@ -239,8 +238,7 @@ export const ELEMENT_FIRST_IONIZATION_KJ: Record<number, number | null> = {
   "115": null,
   "116": null,
   "117": null,
-  "118": null,
-  "119": null
+  "118": null
 }
 export const ELEMENT_ELECTRON_AFFINITY_KJ: Record<number, number | null> = {
   "1": 72.769,
@@ -353,15 +351,14 @@ export const ELEMENT_ELECTRON_AFFINITY_KJ: Record<number, number | null> = {
   "108": null,
   "109": null,
   "110": null,
-  "111": 151,
+  "111": null,
   "112": null,
-  "113": 66.6,
+  "113": null,
   "114": null,
-  "115": 35.3,
-  "116": 74.9,
-  "117": 165.9,
-  "118": 5.40318,
-  "119": 63.87
+  "115": null,
+  "116": null,
+  "117": null,
+  "118": 5.40318
 }
 export const ELEMENT_SPECIFIC_HEAT_J_PER_GK: Record<number, number | null> = {
   "1": 28.607142857142854,
@@ -481,8 +478,7 @@ export const ELEMENT_SPECIFIC_HEAT_J_PER_GK: Record<number, number | null> = {
   "115": null,
   "116": null,
   "117": null,
-  "118": null,
-  "119": null
+  "118": null
 }
 export const ELEMENT_BLOCK: Record<number, 's' | 'p' | 'd' | 'f' | null> = {
   "1": "s",
@@ -602,8 +598,7 @@ export const ELEMENT_BLOCK: Record<number, 's' | 'p' | 'd' | 'f' | null> = {
   "115": "p",
   "116": "p",
   "117": "p",
-  "118": "p",
-  "119": "s"
+  "118": "p"
 }
 export const ELEMENT_ATOMIC_RADIUS_PM: Record<number, number | null> = {
   "1": 120,

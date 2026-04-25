@@ -43,3 +43,25 @@ export function tileColorsForExploreScalar(
   const ink = faceL > 50 ? '#0a1020' : '#f8fafc'
   return { face, rimTop, rimBot, ink }
 }
+
+export function tileColorsForThresholdGrayscale(active: boolean): {
+  face: string
+  rimTop: string
+  rimBot: string
+  ink: string
+} {
+  if (active) {
+    return {
+      face: 'hsl(0 0% 92%)',
+      rimTop: 'hsl(0 0% 100%)',
+      rimBot: 'hsl(0 0% 64%)',
+      ink: '#0a1020',
+    }
+  }
+  return {
+    face: 'hsl(0 0% 24%)',
+    rimTop: 'hsl(0 0% 38%)',
+    rimBot: 'hsl(0 0% 10%)',
+    ink: '#f8fafc',
+  }
+}

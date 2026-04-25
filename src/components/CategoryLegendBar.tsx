@@ -53,11 +53,6 @@ export const CategoryLegendBar = memo(function CategoryLegendBar({
             onClick={() => onToggle(item.id)}
             aria-pressed={clicked === item.id}
           >
-            {item.id === 'halogen' ? (
-              <span className="app-legend-halogen-mark" aria-hidden>
-                ×
-              </span>
-            ) : null}
             {item.label}
           </button>
         )

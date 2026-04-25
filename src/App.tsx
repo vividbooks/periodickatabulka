@@ -30,7 +30,6 @@ import { SHELL_ELECTRONS_BY_ATOMIC_NUMBER } from './data/shellsFromPeriodicTable
 import {
   formatShellsKlm,
   zsElectronBlockLetter,
-  zsPraktickaPoznamka,
   zsValencePopis,
 } from './data/zsChemNarativ'
 import {
@@ -38,7 +37,6 @@ import {
   oralSafetyStatusLabelCs,
 } from './data/elementLickability'
 import {
-  earthAbundanceNoteForElement,
   earthAbundancePercentForZ,
   formatEarthAbundancePercentCs,
 } from './data/elementEarthAbundance'
@@ -807,7 +805,6 @@ const ZsInspectorPanel = memo(function ZsInspectorPanel({
     if (!c || !sh) return null
     const oralSafety = oralSafetyProfileForElement(element)
     const earthAbundance = earthAbundancePercentForZ(element.z) ?? 0
-    const earthAbundanceNote = earthAbundanceNoteForElement(element)
     const en = c.elektronegativita
     const rho = c.hustota
     const blok = zsElectronBlockLetter(element)
@@ -940,19 +937,6 @@ const ZsInspectorPanel = memo(function ZsInspectorPanel({
                 {formatEarthAbundancePercentCs(earthAbundance)}
               </span>
             </div>
-            <p className="inspector-oral-text">
-              Bulk podíl celé Země. {earthAbundanceNote}
-            </p>
-          </section>
-
-          <section
-            className="inspector-card inspector-card--tip"
-            aria-label="Praktická poznámka"
-          >
-            <h4 className="inspector-card__eyebrow inspector-card__eyebrow--tip">
-              Tip pro výuku
-            </h4>
-            <p className="inspector-tip-text">{zsPraktickaPoznamka(c)}</p>
           </section>
 
           <section className="inspector-card" aria-label="Můžu to olíznout">

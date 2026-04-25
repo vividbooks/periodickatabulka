@@ -230,7 +230,7 @@ export const REFERENCE_MASS_NUMBER_BY_Z: Record<number, number> = {
   100: 257,
   101: 258,
   102: 259,
-  103: 266,
+  103: 262,
   104: 267,
   105: 268,
   106: 269,

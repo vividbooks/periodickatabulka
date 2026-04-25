@@ -273,12 +273,12 @@ function categoryForZ(z: number): ElementCategory {
     75, 76, 77, 78, 79, 80, 104, 105, 106, 107, 108, 109, 110, 111, 112,
   ])
   if (transition.has(z)) return 'transition'
-  if ([13, 31, 49, 50, 81, 82, 83, 113, 114, 115, 116].includes(z))
+  if ([13, 31, 49, 50, 81, 82, 83, 113, 114, 115, 116, 117, 118].includes(z))
     return 'post-transition'
-  if ([5, 14, 32, 33, 34, 51, 52, 84].includes(z)) return 'metalloid'
+  if ([5, 14, 32, 33, 34, 51, 52, 84, 85].includes(z)) return 'metalloid'
   if ([1, 6, 7, 8, 15, 16].includes(z)) return 'nonmetal'
-  if ([9, 17, 35, 53, 85, 117].includes(z)) return 'halogen'
-  if ([2, 10, 18, 36, 54, 86, 118].includes(z)) return 'noble-gas'
+  if ([9, 17, 35, 53].includes(z)) return 'halogen'
+  if ([2, 10, 18, 36, 54, 86].includes(z)) return 'noble-gas'
   return 'nonmetal'
 }
 

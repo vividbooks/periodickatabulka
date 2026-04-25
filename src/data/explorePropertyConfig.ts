@@ -100,6 +100,7 @@ export type PropertyScaleMeta = {
   formatBound: (n: number) => string
   trackGradient?: string
   scalarPalette?: 'rainbow' | 'grayscale'
+  selectionMode?: 'range' | 'max-only'
 }
 
 const boilingExtent = extentFrom((z) => {
@@ -198,7 +199,7 @@ export const PROPERTY_SCALE: Record<PropertyExploreKey, PropertyScaleMeta> = {
     min: eaExtent.min,
     max: eaExtent.max,
     step: 1,
-    label: 'Afinita elektronu',
+    label: 'Elektronová afinita',
     unit: 'kJ/mol',
     formatBound: (n) => `${fmtIntCs(n)} kJ/mol`,
   },
@@ -227,6 +228,7 @@ export const PROPERTY_SCALE: Record<PropertyExploreKey, PropertyScaleMeta> = {
     formatBound: (n) => formatDiscoveryYearCs(n),
     trackGradient: 'linear-gradient(90deg, #05070d 0%, #ffffff 100%)',
     scalarPalette: 'grayscale',
+    selectionMode: 'max-only',
   },
   'earth-abundance': {
     min: earthAbundanceExtent.min,
@@ -238,6 +240,7 @@ export const PROPERTY_SCALE: Record<PropertyExploreKey, PropertyScaleMeta> = {
     trackGradient:
       'linear-gradient(90deg, hsl(235 72% 34%) 0%, hsl(180 72% 42%) 30%, hsl(90 78% 46%) 62%, hsl(12 82% 49%) 100%)',
     scalarPalette: 'rainbow',
+    selectionMode: 'max-only',
   },
 }
 
@@ -254,6 +257,6 @@ export function defaultPropertyExploreState(
     kind: 'property',
     property: key,
     rangeMin: s.min,
-    rangeMax: s.max,
+    rangeMax: s.selectionMode === 'max-only' ? s.min : s.max,
   }
 }

@@ -36,10 +36,10 @@ export const CATEGORY_EXPLORE_BUTTONS: readonly ExploreLegendBarButton[] =
   }))
 
 export const BLOCK_EXPLORE_BUTTONS: readonly ExploreLegendBarButton[] = [
-  { id: 's', label: 's-blok', style: 'block-s' },
-  { id: 'p', label: 'p-blok', style: 'block-p' },
-  { id: 'd', label: 'd-blok', style: 'block-d' },
-  { id: 'f', label: 'f-blok', style: 'block-f' },
+  { id: 's', label: 's-prvky', style: 'block-s' },
+  { id: 'p', label: 'p-prvky', style: 'block-p' },
+  { id: 'd', label: 'd-prvky', style: 'block-d' },
+  { id: 'f', label: 'f-prvky', style: 'block-f' },
 ]
 
 export const METAL_TYPE_EXPLORE_BUTTONS: readonly ExploreLegendBarButton[] = [

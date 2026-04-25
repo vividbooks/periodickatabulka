@@ -135,6 +135,10 @@
   min-width: min(100%, 280px);
 }
 
+.app-prop-explore__mp-row--single {
+  gap: 14px;
+}
+
 .app-prop-explore__note {
   flex: 0 0 100%;
   width: 100%;
@@ -155,6 +159,15 @@
   flex-shrink: 0;
   max-width: 4.2rem;
   line-height: 1.15;
+}
+
+.app-prop-explore__mp-bound--current {
+  min-width: 5.2rem;
+  max-width: none;
+  font-size: clamp(1.1rem, 2.1vw, 1.7rem);
+  font-weight: 700;
+  color: #ffffff;
+  text-align: right;
 }
 
 .app-prop-explore__dual {
