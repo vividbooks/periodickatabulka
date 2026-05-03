@@ -6,7 +6,6 @@
 import type { ChemicalElement } from './elements'
 import { ELEMENT_BLOCK } from './elementExploreScalars.generated'
 import {
-  eatabilityForElement,
   lickabilityForElement,
   type OralSafetyStatus,
 } from './elementLickability'
@@ -53,7 +52,7 @@ const ORAL_STATUS_FILL: Record<OralSafetyStatus, ClassificationTileColors> = {
 
 export function tileColorsForExploreClassification(
   el: ChemicalElement,
-  subtype: 'block' | 'state' | 'lickability' | 'eatability',
+  subtype: 'block' | 'state' | 'lickability',
 ): ClassificationTileColors {
   switch (subtype) {
     case 'block': {
@@ -67,7 +66,5 @@ export function tileColorsForExploreClassification(
     }
     case 'lickability':
       return ORAL_STATUS_FILL[lickabilityForElement(el)]
-    case 'eatability':
-      return ORAL_STATUS_FILL[eatabilityForElement(el)]
   }
 }

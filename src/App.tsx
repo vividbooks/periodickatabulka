@@ -38,8 +38,9 @@ import {
 } from './data/elementLickability'
 import {
   earthAbundancePercentForZ,
-  formatEarthAbundancePercentCs,
+  formatEarthAbundancePercentInspectorCs,
 } from './data/elementEarthAbundance'
+import { elementEverydayFactForZ } from './data/elementEverydayFacts'
 import { vividbooksKnowledgeIdsForElement } from './data/vividbooksLessonsForElement'
 import {
   DEFAULT_EXPLORE_PROPERTY_STATE,
@@ -805,6 +806,7 @@ const ZsInspectorPanel = memo(function ZsInspectorPanel({
     if (!c || !sh) return null
     const oralSafety = oralSafetyProfileForElement(element)
     const earthAbundance = earthAbundancePercentForZ(element.z) ?? 0
+    const everydayFact = elementEverydayFactForZ(element.z)
     const en = c.elektronegativita
     const rho = c.hustota
     const blok = zsElectronBlockLetter(element)
@@ -842,6 +844,16 @@ const ZsInspectorPanel = memo(function ZsInspectorPanel({
                 </span>
               </li>
             </ul>
+          </section>
+
+          <section
+            className="inspector-card inspector-card--tip"
+            aria-label="Kde se s prvkem setkáš"
+          >
+            <h4 className="inspector-card__eyebrow inspector-card__eyebrow--tip">
+              Kde ho najdeš
+            </h4>
+            <p className="inspector-tip-text">{everydayFact}</p>
           </section>
 
           <section className="inspector-card" aria-label="Částice v atomu">
@@ -934,7 +946,7 @@ const ZsInspectorPanel = memo(function ZsInspectorPanel({
             <div className="inspector-card__head">
               <h4 className="inspector-card__eyebrow">Zastoupení na Zemi</h4>
               <span className="inspector-oral-status inspector-oral-status--neutral">
-                {formatEarthAbundancePercentCs(earthAbundance)}
+                {formatEarthAbundancePercentInspectorCs(earthAbundance)}
               </span>
             </div>
           </section>
@@ -954,20 +966,6 @@ const ZsInspectorPanel = memo(function ZsInspectorPanel({
             <p className="inspector-oral-text">{oralSafety.lick.text}</p>
           </section>
 
-          <section className="inspector-card" aria-label="Můžu to sníst">
-            <div className="inspector-card__head">
-              <h4 className="inspector-card__eyebrow">Můžu to sníst?</h4>
-              <span
-                className={[
-                  'inspector-oral-status',
-                  `inspector-oral-status--${oralSafety.eat.status}`,
-                ].join(' ')}
-              >
-                {oralSafetyStatusLabelCs(oralSafety.eat.status)}
-              </span>
-            </div>
-            <p className="inspector-oral-text">{oralSafety.eat.text}</p>
-          </section>
       </div>
     )
   }, [element])

@@ -493,8 +493,7 @@ function PeriodicTableInner({
           exploreProperty.kind === 'classification' &&
           (exploreProperty.subtype === 'block' ||
             exploreProperty.subtype === 'state' ||
-            exploreProperty.subtype === 'lickability' ||
-            exploreProperty.subtype === 'eatability')
+            exploreProperty.subtype === 'lickability')
             ? tileColorsForExploreClassification(el, exploreProperty.subtype)
             : null
         const tileOverlayColors = propColors ?? classColors
@@ -635,9 +634,8 @@ function PeriodicTableInner({
   )
   const canvasSafetyNotice =
     exploreProperty.kind === 'classification' &&
-    (exploreProperty.subtype === 'lickability' ||
-      exploreProperty.subtype === 'eatability')
-      ? 'V chemii se ve třídě ani v laboratoři žádné prvky nejí ani neolizují. Je to nebezpečné. Tento přehled je jen orientační vysvětlení chemických vlastností.'
+    exploreProperty.subtype === 'lickability'
+      ? 'V chemii se žádné látky neochutnávají ani neolizují – i zdánlivě bezpečný prvek může být znečištěný nebo v nebezpečné formě (např. prášek či roztok). Tento přehled slouží jen k orientačnímu pochopení vlastností látek.'
       : null
 
   const rootStyle: CSSProperties | undefined =

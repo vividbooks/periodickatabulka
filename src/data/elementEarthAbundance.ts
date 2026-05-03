@@ -151,3 +151,12 @@ export function formatEarthAbundancePercentCs(n: number): string {
     maximumFractionDigits: 1,
   }).format(Number.isFinite(n) && n > 0 ? n : 0)} %`
 }
+
+/** Zobrazení v pravém panelu u prvku – bez umělého zaokrouhlení na 1 des. místo. */
+export function formatEarthAbundancePercentInspectorCs(n: number): string {
+  if (!Number.isFinite(n) || n === 0) return '0 %'
+  return `${new Intl.NumberFormat('cs-CZ', {
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 16,
+  }).format(n)} %`
+}

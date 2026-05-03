@@ -3,7 +3,6 @@ import { ZS_ELEMENT_CORE } from './zsElementCore'
 
 export type OralSafetyStatus = 'yes' | 'ambiguous' | 'no'
 export type LickabilityKey = OralSafetyStatus
-export type EatabilityKey = OralSafetyStatus
 
 export type OralSafetyEntry = {
   status: OralSafetyStatus
@@ -12,7 +11,6 @@ export type OralSafetyEntry = {
 
 export type OralSafetyProfile = {
   lick: OralSafetyEntry
-  eat: OralSafetyEntry
 }
 
 const RADIOACTIVE_OR_SYNTHETIC = (z: number) => z === 43 || z === 61 || z >= 84
@@ -25,75 +23,44 @@ const LICK_AMBIGUOUS_Z = new Set([
   24, 25, 27, 28, 29, 30, 42, 44, 45, 46,
 ])
 
-const EAT_YES_Z = new Set([6, 22, 26, 47, 79, 83])
-
-const EAT_AMBIGUOUS_Z = new Set([12, 14, 29, 30, 42, 78])
-
 const CUSTOM_LICK_TEXT: Partial<Record<number, string>> = {
-  4: 'Be — Beryllium: Ne. Chronická berylióza umí sežrat plíce i z mnohem menších expozic.',
-  6: 'C — Uhlík: Tužka, aktivní uhlí, diamant. Chuťově nula, bezpečně nula.',
-  9: 'F — Fluor: Ne. Extrémně reaktivní plyn; v puse by z toho byl okamžitý chemický průšvih.',
-  12: 'Mg — Hořčík: Lehce zašumí jen v reaktivnějších formách; kompaktní kus je pro krátký kontakt spíš v klidu, ale chutná chemicky.',
-  13: 'Al — Hliník: Olízni fólii. Pokud máš amalgámovou plombu, dostaneš mini-šok z galvanického článku v puse.',
-  14: 'Si — Křemík: Inertní. Jako olíznout solární panel — chutná po ničem.',
-  15: 'P — Fosfor: Ne. Bílý fosfor je vyloženě průšvih a ani ostatní formy nejsou dobrý nápad do pusy.',
-  22: 'Ti — Titan: Biokompatibilní. Jazyk s titanem si rozumí.',
-  24: 'Cr — Chrom: Sporné. Kovový chrom na nárazníku je jiný svět než rozpustné sloučeniny chromu.',
-  25: 'Mn — Mangan: Sporné. Tělo ho v malém potřebuje, ale kov ani prach není něco, co chceš olizovat pravidelně.',
-  26: 'Fe — Železo: Litina chutná po krvi. Není to náhoda — máme ho v hemoglobinu.',
-  27: 'Co — Kobalt: Sporné. Kovový dotek krátce přežiješ, ale pořád je to těžší kov.',
-  28: 'Ni — Nikl: Sporné. Pětikoruna krátce nic, ale alergici poznají nikl velmi rychle.',
-  29: 'Cu — Měď: Sporné. Mince chutná jako mince, ale delší kontakt už pouští ionty.',
-  30: 'Zn — Zinek: Sporné. Kompaktní kus je snesitelnější než prášek či reaktivní povrch.',
-  40: 'Zr — Zirkonium: Zubní korunky se z něj dělají, takže krátký kontakt jazyk zvládne bez dramatu.',
-  42: 'Mo — Molybden: Sporné. Je to mikronutrient, ale kovový kus do pusy pořád není svačina.',
-  44: 'Ru — Ruthenium: Sporné. Drahý a stabilní kov, ale běžný člověk ho do pusy stejně nepotká.',
-  45: 'Rh — Rhodium: Sporné. Povrchově stabilní kov, ale pořád spíš laboratorní kuriozita než lízátko.',
-  46: 'Pd — Palladium: Sporné. Stabilní, ale raději ve šperku než v puse.',
-  47: 'Ag — Stříbro: Stříbrná lžička ano. Jen z toho nedělej každodenní zvyk.',
-  50: 'Sn — Cín: Stará plechovka nebo cínový vojáček v kompaktní podobě je krátce v pohodě.',
-  73: 'Ta — Tantal: Chirurgické implantáty ho zvládají, tak jazyk taky.',
-  74: 'W — Wolfram: Tvrdý, inertní, bez chuti.',
-  75: 'Re — Rhenium: Pokud se ti někde povaluje, krátký kontakt bude ten nejmenší problém. Nepovaluje.',
-  76: 'Os — Osmium: Ne v prášku, ten je toxický; kompaktní kus je jiný příběh, ale běžně se s ním stejně nepotkáš.',
-  77: 'Ir — Iridium: Jeden z nejstabilnějších kovů vůbec. Naprostý klid.',
-  78: 'Pt — Platina: Prsten ano.',
-  79: 'Au — Zlato: Mince, prsten, cokoliv. Nic zásadního.',
-  19: 'K — Draslík: Ne. Se slinami reaguje tak rychle, že z toho může být velmi ošklivá chemická nehoda.',
-  33: 'As — Arsen: Ne. Klasický jed, který si drží reputaci už staletí.',
-  37: 'Rb — Rubidium: Ne. Ještě prudší alkalický kov než sodík a draslík.',
-  55: 'Cs — Cesium: Ne. Extrémně reaktivní kov, který v puse opravdu nechceš.',
-  80: 'Hg — Rtuť: Ne. Kovová kapka možná projde, ale páry a chronická expozice jsou vyloženě špatný nápad.',
-  81: 'Tl — Thallium: Ne. Jed travičů bez respektu.',
-  83: 'Bi — Bismut: Z těžších kovů ten nejmíň dramatický; krátký kontakt je v pohodě.',
-  92: 'U — Uran: Ne. Radioaktivita a toxicita z něj dělají spíš učebnicový varovný příklad.',
-}
-
-const CUSTOM_EAT_TEXT: Partial<Record<number, string>> = {
-  6: 'C — Uhlík: Aktivní uhlí je přímo lék na střeva. Grafit z tužky projde prakticky beze změny.',
-  12: 'Mg — Hořčík: Sporné. Doplňky stravy jsou hořečnaté soli, ne kus kovu; kompaktní Mg není akutní horor, ale není to jídlo.',
-  14: 'Si — Křemík: Sporné. Křemičitany jíš běžně, ale čistý kousek křemíku je spíš zbytečná inertní věc.',
-  22: 'Ti — Titan: Kdybys omylem spolknul titanový šroubek, chemicky se nic moc nestane. Zuby jsou větší problém než otrava.',
-  26: 'Fe — Železo: Ve stravě ho máme pořád. Hřebík je problém pro zuby a trávení, ne primárně pro chemickou otravu.',
-  29: 'Cu — Měď: Sporné. Stopově ji potřebujeme, ale spolknout kus mědi nebo si rozpustit hodně iontů nechceš.',
-  30: 'Zn — Zinek: Sporné. Vitaminy ano, velký kus kovu ne; forma a dávka dělají všechno.',
-  42: 'Mo — Molybden: Sporné. Je to potřebný mikronutrient, ale kovový kus pořád není rozumné jídlo.',
-  47: 'Ag — Stříbro: Jedlé stříbro E174 existuje, takže malinké množství ano. Denní dieta to ale opravdu být nemá.',
-  79: 'Au — Zlato: Jedlé plátky na sushi nebo v dezertu jsou přesně ten inertní případ, který jen projde trávicím traktem.',
-  78: 'Pt — Platina: Sporné. Inertní by projít mohla, ale to není argument ji jíst.',
-  83: 'Bi — Bismut: Bismutové soli jsou dokonce léčivé, takže tady je chemie překvapivě přátelská.',
-  4: 'Be — Beryllium: Ne. Tohle fakt nepatří ani do plic, ani do pusy.',
-  9: 'F — Fluor: Ne. Tohle není jídlo, ale noční můra chemika.',
-  11: 'Na — Sodík: Ne. Se slinami a vodou reaguje moc prudce.',
-  15: 'P — Fosfor: Ne. Forma rozhoduje, ale žádná elementární verze není dobrý nápad na svačinu.',
-  19: 'K — Draslík: Ne. Reaktivita s vodou je příliš brutální.',
-  33: 'As — Arsen: Ne. Tohle je historicky osvědčený jed, ne minerální doplněk.',
-  37: 'Rb — Rubidium: Ne. Ještě horší verze alkalického kovu.',
-  55: 'Cs — Cesium: Ne. Reaktivita a teplo z reakce jsou mimo bezpečnou zónu.',
-  80: 'Hg — Rtuť: Ne. Kovová kapka možná projde, ale páry a organické formy jsou velký problém.',
-  81: 'Tl — Thallium: Ne. Klasický jed travičů.',
-  84: 'Po — Polonium: Ne. Mikrogramy umí zabíjet.',
-  92: 'U — Uran: Ne. Radioaktivní a toxický kov do jídelníčku opravdu nepatří.',
+  4: 'Be — Beryllium: Ne. Beryllium a jeho sloučeniny jsou výrazně toxické; nebezpečný je zejména prach a vdechnutí částic.',
+  6: 'C — Uhlík: Ano. Čistý uhlík v podobě grafitu, diamantu nebo aktivního uhlí je chemicky málo reaktivní; riziko ale vždy závisí na čistotě a formě.',
+  9: 'F — Fluor: Ne. Fluor je extrémně reaktivní a toxický plyn; kontakt se sliznicí by byl nebezpečný.',
+  12: 'Mg — Hořčík: Ano. Kompaktní kus čistého hořčíku je pro krátký kontakt poměrně málo rizikový, zatímco prášek, hořící kov nebo sloučeniny mohou být nebezpečné.',
+  13: 'Al — Hliník: Ano. Čistý kompaktní hliník je za běžných podmínek málo reaktivní, protože ho chrání tenká vrstva oxidu; prášek a některé sloučeniny se chovají jinak.',
+  14: 'Si — Křemík: Ano. Elementární křemík je v kompaktní podobě velmi málo reaktivní; riziko by představoval hlavně prach nebo znečištění.',
+  15: 'P — Fosfor: Ne. Elementární fosfor může být velmi nebezpečný, zejména bílý fosfor; do úst nepatří žádná jeho forma.',
+  22: 'Ti — Titan: Ano. Titan je v čisté kompaktní podobě velmi stálý a biokompatibilní, proto se používá i v implantátech.',
+  24: 'Cr — Chrom: Sporné. Kovový chrom je poměrně stálý, ale některé sloučeniny chromu jsou výrazně toxické; rozhoduje konkrétní forma a čistota.',
+  25: 'Mn — Mangan: Sporné. Mangan je stopový biogenní prvek, ale kovový prach a některé sloučeniny mohou být toxické.',
+  26: 'Fe — Železo: Ano. Čisté kompaktní železo je pro krátký kontakt málo rizikové; problémem může být rez, nečistoty nebo ostrý povrch.',
+  27: 'Co — Kobalt: Sporné. Kobalt je v malém množství součástí vitaminu B12, ale kovový prach a některé sloučeniny mohou být zdraví škodlivé.',
+  28: 'Ni — Nikl: Sporné. Nikl často vyvolává kontaktní alergie a jeho rozpustné sloučeniny mohou být toxické, i když kompaktní kov je méně reaktivní.',
+  29: 'Cu — Měď: Sporné. Měď je stopový prvek potřebný pro organismus, ale při delším kontaktu se mohou uvolňovat ionty a vyšší dávky jsou škodlivé.',
+  30: 'Zn — Zinek: Sporné. Zinek je nezbytný stopový prvek, ale kovový prášek, oxidy a nadměrné množství mohou být rizikové.',
+  40: 'Zr — Zirkonium: Ano. Zirkonium je v kompaktní podobě velmi stálé a používá se i v biokompatibilních materiálech; prášek je ale reaktivnější.',
+  42: 'Mo — Molybden: Sporné. Molybden je potřebný stopový prvek, ale elementární kov ani jeho prach nejsou vhodné pro kontakt s ústy.',
+  44: 'Ru — Ruthenium: Sporné. Kompaktní ruthenium je poměrně stálý ušlechtilý kov, ale některé jeho sloučeniny mohou být nebezpečné.',
+  45: 'Rh — Rhodium: Sporné. Rhodium je v kovové podobě velmi stálé, ale jde o laboratorně neobvyklý prvek a jeho sloučeniny nelze považovat za bezpečné.',
+  46: 'Pd — Palladium: Sporné. Kovové palladium je poměrně stálé, ale může vyvolávat citlivost nebo alergické reakce a některé sloučeniny jsou problematické.',
+  47: 'Ag — Stříbro: Ano. Čisté kovové stříbro je pro krátký kontakt málo rizikové, ale dlouhodobé nebo opakované vystavení sloučeninám stříbra vhodné není.',
+  50: 'Sn — Cín: Ano. Kovový cín je v kompaktní podobě relativně málo toxický; nebezpečné mohou být některé organocíničité sloučeniny.',
+  73: 'Ta — Tantal: Ano. Tantal je velmi stálý a biokompatibilní kov, který se používá i ve zdravotnických materiálech.',
+  74: 'W — Wolfram: Ano. Kompaktní wolfram je tvrdý, velmi stálý kov s nízkou rozpustností; rizikovější je prach nebo některé sloučeniny.',
+  75: 'Re — Rhenium: Ano. Kompaktní rhenium je velmi stálý kov; praktické riziko by se týkalo spíš prachu, sloučenin nebo nečistot.',
+  76: 'Os — Osmium: Ano. Kompaktní osmium je stálé, ale práškové osmium může tvořit vysoce toxický oxid osmičelý.',
+  77: 'Ir — Iridium: Ano. Iridium patří mezi velmi stálé a málo reaktivní kovy; riziko představují hlavně jemné částice nebo sloučeniny.',
+  78: 'Pt — Platina: Ano. Čistá kompaktní platina je velmi stálá a používá se ve špercích i zdravotnictví; sloučeniny platiny však mohou být dráždivé nebo toxické.',
+  79: 'Au — Zlato: Ano. Čisté zlato je velmi stálé a chemicky málo reaktivní; riziko by představovaly hlavně nečistoty nebo slitiny s jinými kovy.',
+  19: 'K — Draslík: Ne. Kovový draslík prudce reaguje s vodou i vlhkostí, takže kontakt se slinami by byl nebezpečný.',
+  33: 'As — Arsen: Ne. Arsen a řada jeho sloučenin jsou vysoce toxické.',
+  37: 'Rb — Rubidium: Ne. Rubidium je velmi reaktivní alkalický kov a prudce reaguje s vodou i vlhkostí.',
+  55: 'Cs — Cesium: Ne. Cesium je extrémně reaktivní alkalický kov; kontakt se slinami by mohl vést k prudké reakci.',
+  80: 'Hg — Rtuť: Ne. Rtuť je toxická zejména kvůli parám a některým sloučeninám; kontakt s ní není bezpečný.',
+  81: 'Tl — Thallium: Ne. Thallium a jeho sloučeniny patří mezi velmi toxické látky.',
+  83: 'Bi — Bismut: Ano. Bismut patří mezi méně toxické těžké kovy a v kompaktní podobě je poměrně stálý.',
+  92: 'U — Uran: Ne. Uran je radioaktivní a zároveň chemicky toxický těžký kov.',
 }
 
 function genericLickText(
@@ -104,29 +71,12 @@ function genericLickText(
   const name = core ? core.typLatkyZs : 'prvek'
   switch (status) {
     case 'yes':
-      return `${element.symbol} — ${element.nameCs}: Krátký kontakt s kompaktním kusem bývá nízkorizikový; větší problém dělají až ionty, prach nebo reaktivní povrch.`
+      return `${element.symbol} — ${element.nameCs}: Ano. U čistého kompaktního prvku bývá krátký kontakt chemicky málo rizikový; prach, ionty, sloučeniny nebo nečistoty mohou být výrazně nebezpečnější.`
     case 'ambiguous':
-      return `${element.symbol} — ${element.nameCs}: Sporné. Záleží hodně na formě, čistotě a povrchu; kompaktní kus je jiný příběh než prášek, oxidy nebo rozpustné sloučeniny (${name}).`
+      return `${element.symbol} — ${element.nameCs}: Sporné. Záleží na formě, čistotě a povrchu; kompaktní ${name} může být méně rizikový než prášek, oxidy nebo rozpustné sloučeniny.`
     case 'no':
     default:
-      return `${element.symbol} — ${element.nameCs}: Ne. Reaktivita, toxicita nebo radioaktivita je tady zbytečně vysoká.`
-  }
-}
-
-function genericEatText(
-  element: Pick<ChemicalElement, 'z' | 'symbol' | 'nameCs'>,
-  status: OralSafetyStatus,
-): string {
-  const core = ZS_ELEMENT_CORE[element.z]
-  const name = core ? core.typLatkyZs : 'prvek'
-  switch (status) {
-    case 'yes':
-      return `${element.symbol} — ${element.nameCs}: V inertní nebo stopové podobě projde bez větší chemické reakce, ale pořád to není jídlo pro radost.`
-    case 'ambiguous':
-      return `${element.symbol} — ${element.nameCs}: Sporné. Jedna forma může být v pohodě, jiná problematická; u ${name} rozhoduje dávka i konkrétní chemická podoba.`
-    case 'no':
-    default:
-      return `${element.symbol} — ${element.nameCs}: Ne. Tady už je chemie, toxicita nebo radioaktivita moc drahá legrace.`
+      return `${element.symbol} — ${element.nameCs}: Ne. Kvůli reaktivitě, toxicitě nebo radioaktivitě není bezpečné dávat tento prvek do kontaktu s ústy.`
   }
 }
 
@@ -156,25 +106,10 @@ export function lickabilityForElement(
   return 'no'
 }
 
-export function eatabilityForElement(
-  element: Pick<ChemicalElement, 'z'>,
-): EatabilityKey {
-  const z = element.z
-  const core = ZS_ELEMENT_CORE[z]
-
-  if (!core) return 'no'
-  if (RADIOACTIVE_OR_SYNTHETIC(z)) return 'no'
-  if (core.stavPriStp !== 'pevná') return 'no'
-  if (EAT_YES_Z.has(z)) return 'yes'
-  if (EAT_AMBIGUOUS_Z.has(z)) return 'ambiguous'
-  return 'no'
-}
-
 export function oralSafetyProfileForElement(
   element: Pick<ChemicalElement, 'z' | 'symbol' | 'nameCs'>,
 ): OralSafetyProfile {
   const lickStatus = lickabilityForElement(element)
-  const eatStatus = eatabilityForElement(element)
 
   return {
     lick: {
@@ -182,12 +117,6 @@ export function oralSafetyProfileForElement(
       text:
         CUSTOM_LICK_TEXT[element.z] ??
         genericLickText(element, lickStatus),
-    },
-    eat: {
-      status: eatStatus,
-      text:
-        CUSTOM_EAT_TEXT[element.z] ??
-        genericEatText(element, eatStatus),
     },
   }
 }

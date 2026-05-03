@@ -215,8 +215,6 @@ export const PropertyExplorePanel = memo(function PropertyExplorePanel({
         return 'Skupenství při STP'
       case 'lickability':
         return 'Mohu to olíznout?'
-      case 'eatability':
-        return 'Mohu to sníst?'
       default:
         return 'Klasifikace'
     }
@@ -311,7 +309,6 @@ export const PropertyExplorePanel = memo(function PropertyExplorePanel({
           </optgroup>
           <optgroup label="Ostatní">
             <option value="c:lickability">Mohu to olíznout?</option>
-            <option value="c:eatability">Mohu to sníst?</option>
             <option value="p:discovery-year">Časový vývoj</option>
             <option value="p:earth-abundance">Zastoupení % na Zemi</option>
           </optgroup>
